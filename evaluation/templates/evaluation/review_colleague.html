@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review {{ colleague.username }} - PRODVI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .review-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .review-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+
+        .colleague-info {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #28a745;
+        }
+
+        .question-group {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+        }
+
+        .question-number {
+            color: #007bff;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .question-text {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .answer-textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            min-height: 100px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .answer-textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="review-container">
+        <a href="{% url 'employee_dashboard' %}" class="back-link">← Back to Dashboard</a>
+        
+        <div class="review-header">
+            <h1>Peer Review</h1>
+            <h2 style="color: #667eea;">{{ form.title }}</h2>
+        </div>
+
+        <div class="colleague-info">
+            <h3>You are reviewing: <strong>{{ colleague.username }}</strong></h3>
+            {% if colleague.department %}
+                <p><strong>Department:</strong> {{ colleague.department }}</p>
+            {% endif %}
+            <p style="margin-top: 10px; font-style: italic;">Please provide honest and constructive feedback about your colleague's performance and collaboration.</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            {% for question in form.questions %}
+                <div class="question-group">
+                    <div class="question-number">Question {{ forloop.counter }} of {{ form.questions|length }}</div>
+                    <div class="question-text">{{ question.text }}</div>
+                    <textarea 
+                        name="question_{{ forloop.counter0 }}" 
+                        class="answer-textarea" 
+                        placeholder="Share your thoughts about {{ colleague.username }}'s performance in this area..."
+                        required
+                    ></textarea>
+                </div>
+            {% endfor %}
+            
+            <button type="submit" class="submit-btn">Submit Review for {{ colleague.username }}</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Form - PRODVI</title>
+    <title>Create Peer Review Form - PRODVI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -34,23 +34,12 @@
             margin-bottom: 30px;
         }
 
-        .form-header h1 {
-            color: #333;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
         .back-link {
             display: inline-block;
             margin-bottom: 20px;
             color: #667eea;
             text-decoration: none;
             font-weight: 500;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
         }
 
         .form-group {
@@ -62,7 +51,6 @@
             margin-bottom: 8px;
             color: #333;
             font-weight: 500;
-            font-size: 0.95rem;
         }
 
         .form-group input,
@@ -73,7 +61,6 @@
             border-radius: 10px;
             font-size: 1rem;
             transition: all 0.3s ease;
-            background: #fff;
         }
 
         .form-group input:focus,
@@ -83,16 +70,11 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .form-group textarea {
-            height: 120px;
-            resize: vertical;
-        }
-
         .employee-selection {
             border: 2px solid #e1e5e9;
             border-radius: 10px;
             padding: 15px;
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
         }
 
@@ -105,11 +87,6 @@
 
         .employee-item:last-child {
             border-bottom: none;
-        }
-
-        .employee-item input[type="checkbox"] {
-            margin-right: 10px;
-            width: auto;
         }
 
         .submit-btn {
@@ -125,15 +102,18 @@
             transition: all 0.3s ease;
         }
 
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
-        }
-
         .help-text {
             font-size: 0.85rem;
             color: #666;
             margin-top: 5px;
+        }
+
+        .peer-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -142,8 +122,15 @@
         <a href="{% url 'admin_dashboard' %}" class="back-link">← Back to Dashboard</a>
         
         <div class="form-header">
-            <h1>Create Evaluation Form</h1>
-            <p>Design a new evaluation form for your employees</p>
+            <h1>Create Peer Review Form</h1>
+            <p>Create a form for employees to review their colleagues</p>
+        </div>
+
+        <div class="peer-info">
+            <h4>How Peer Reviews Work:</h4>
+            <p>• Each assigned employee will review all other assigned employees</p>
+            <p>• If you assign 3 employees, each will review the other 2 colleagues</p>
+            <p>• ML analysis will be performed on all responses automatically</p>
         </div>
 
         <form method="post">
@@ -151,40 +138,40 @@
             
             <div class="form-group">
                 <label for="title">Form Title</label>
-                <input type="text" name="title" id="title" required placeholder="e.g., Monthly Performance Review">
+                <input type="text" name="title" id="title" required placeholder="e.g., Q1 Peer Performance Review">
             </div>
             
             <div class="form-group">
                 <label for="description">Description (Optional)</label>
-                <textarea name="description" id="description" placeholder="Brief description of this evaluation form..."></textarea>
+                <textarea name="description" id="description" placeholder="Brief description of this peer review form..."></textarea>
             </div>
             
             <div class="form-group">
-                <label for="questions">Questions</label>
-                <textarea name="questions" id="questions" required placeholder="Enter each question on a new line:&#10;&#10;How would you rate your communication skills?&#10;What are your key achievements this month?&#10;How do you handle challenging situations?"></textarea>
-                <div class="help-text">Enter each question on a separate line</div>
+                <label for="questions">Review Questions</label>
+                <textarea name="questions" id="questions" required placeholder="Enter each question on a new line:&#10;&#10;How would you rate their communication skills?&#10;How effectively do they collaborate with the team?&#10;What are their key strengths?&#10;What areas could they improve?"></textarea>
+                <div class="help-text">Enter each question on a separate line. These questions will be asked about each colleague.</div>
             </div>
             
             <div class="form-group">
-                <label>Assign to Employees</label>
+                <label>Select Employees for Peer Review</label>
                 <div class="employee-selection">
                     {% for employee in employees %}
                         <div class="employee-item">
-                            <input type="checkbox" name="target_employees" value="{{ employee.id }}" id="emp_{{ employee.id }}">
-                            <label for="emp_{{ employee.id }}">
-                                {{ employee.username }} 
-                                {% if employee.department %}({{ employee.department }}){% endif %}
-                                {% if employee.email %}- {{ employee.email }}{% endif %}
+                            <input type="checkbox" name="assigned_employees" value="{{ employee.id }}" id="emp_{{ employee.id }}">
+                            <label for="emp_{{ employee.id }}" style="margin-left: 10px; margin-bottom: 0;">
+                                <strong>{{ employee.username }}</strong>
+                                {% if employee.department %} - {{ employee.department }}{% endif %}
+                                {% if employee.email %} ({{ employee.email }}){% endif %}
                             </label>
                         </div>
                     {% empty %}
                         <p>No employees found. Create employee accounts first.</p>
                     {% endfor %}
                 </div>
-                <div class="help-text">Select which employees should fill this form</div>
+                <div class="help-text">Select employees who will participate in peer review. Each will review all others selected.</div>
             </div>
             
-            <button type="submit" class="submit-btn">Create Form</button>
+            <button type="submit" class="submit-btn">Create Peer Review Form</button>
         </form>
     </div>
 </body>

@@ -36,60 +36,12 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .header h1 {
-            color: #333;
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #545b62;
-        }
-
         .content-section {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .section-title {
-            color: #333;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 20px;
         }
 
         .form-card {
@@ -100,24 +52,59 @@
             border-left: 4px solid #007bff;
         }
 
-        .form-card.completed {
-            border-left-color: #28a745;
+        .colleague-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
         }
 
-        .form-card h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .form-card p {
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .empty-state {
+        .colleague-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
             text-align: center;
-            color: #666;
-            font-style: italic;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+
+        .btn-completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            height: 100%;
+            transition: width 0.3s ease;
         }
 
         .messages {
@@ -133,27 +120,19 @@
         .alert-success {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
         }
 
         .alert-info {
             background: #d1ecf1;
             color: #0c5460;
-            border: 1px solid #bee5eb;
         }
     </style>
 </head>
 <body>
     <div class="dashboard-container">
         <div class="header">
-            <h1>Employee Dashboard</h1>
-            <div class="user-info">
+            <h1>Peer Review Dashboard</h1>
+            <div>
                 <span>Welcome, <strong>{{ user.username }}</strong></span>
                 <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
             </div>
@@ -170,36 +149,50 @@
         {% endif %}
 
         <div class="content-section">
-            <h2 class="section-title">Assigned Forms</h2>
-            {% for form in assigned_forms %}
+            <h2>Assigned Peer Reviews</h2>
+            {% for item in forms_with_colleagues %}
                 <div class="form-card">
-                    <h3>{{ form.title }}</h3>
-                    <p><strong>Description:</strong> {{ form.description|default:"No description" }}</p>
-                    <p><strong>Questions:</strong> {{ form.questions|length }} questions</p>
-                    <p><strong>Created by:</strong> {{ form.created_by.username }}</p>
-                    <p><strong>Assigned on:</strong> {{ form.created_at|date:"M d, Y" }}</p>
-                    <a href="{% url 'fill_form' form.id %}" class="btn btn-primary">Fill Form</a>
+                    <h3>{{ item.form.title }}</h3>
+                    <p><strong>Description:</strong> {{ item.form.description|default:"No description" }}</p>
+                    <p><strong>Progress:</strong> {{ item.reviewed_count }} of {{ item.total_colleagues }} colleagues reviewed</p>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {% widthratio item.reviewed_count item.total_colleagues 100 %}%"></div>
+                    </div>
+
+                    {% if item.pending_colleagues %}
+                        <h4 style="margin-top: 15px;">Colleagues to Review:</h4>
+                        <div class="colleague-list">
+                            {% for colleague in item.pending_colleagues %}
+                                <div class="colleague-card">
+                                    <h4>{{ colleague.username }}</h4>
+                                    {% if colleague.department %}
+                                        <p style="color: #666; font-size: 0.9rem;">{{ colleague.department }}</p>
+                                    {% endif %}
+                                    <a href="{% url 'review_colleague' item.form.id colleague.id %}" class="btn btn-primary">Review</a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="color: #28a745; font-weight: 500; margin-top: 15px;">✅ All colleagues reviewed for this form!</p>
+                    {% endif %}
                 </div>
             {% empty %}
-                <div class="empty-state">
-                    <p>No forms assigned to you at the moment.</p>
-                </div>
+                <p style="text-align: center; color: #666;">No peer review forms assigned to you at the moment.</p>
             {% endfor %}
         </div>
 
         <div class="content-section">
-            <h2 class="section-title">Completed Forms</h2>
-            {% for response in completed_forms %}
-                <div class="form-card completed">
-                    <h3>{{ response.form.title }}</h3>
-                    <p><strong>Description:</strong> {{ response.form.description|default:"No description" }}</p>
-                    <p><strong>Submitted on:</strong> {{ response.submitted_at|date:"M d, Y at H:i" }}</p>
-                    <p><strong>Status:</strong> <span style="color: #28a745;">✓ Completed</span></p>
+            <h2>Completed Reviews</h2>
+            {% for review in completed_reviews %}
+                <div class="form-card" style="border-left-color: #28a745;">
+                    <h4>{{ review.form.title }}</h4>
+                    <p><strong>Reviewed:</strong> {{ review.reviewee.username }}</p>
+                    <p><strong>Submitted:</strong> {{ review.submitted_at|date:"M d, Y at H:i" }}</p>
+                    <span class="btn btn-completed" style="font-size: 0.8rem;">✓ Completed</span>
                 </div>
             {% empty %}
-                <div class="empty-state">
-                    <p>No completed forms yet.</p>
-                </div>
+                <p style="text-align: center; color: #666;">No completed reviews yet.</p>
             {% endfor %}
         </div>
     </div>

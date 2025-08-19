@@ -167,7 +167,16 @@
         {% endif %}
 
         <form method="post" action="{% url 'login' %}">
-            {% csrf_token %}
+            {% csrf_token %} 
+            {% if form.errors %}
+                <div class="alert alert-error">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+                </div>
+            {% endif %}
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>

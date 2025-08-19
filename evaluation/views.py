@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
-from .models import CustomUser, EvaluationForm, EvaluationResponse
+from .models import CustomUser, EvaluationForm, EvaluationResponse, PeerReview
 import json
 import traceback
 import os
@@ -78,7 +78,32 @@ def is_admin(user):
 def admin_dashboard(request):
     forms = EvaluationForm.objects.filter(created_by=request.user).order_by('-created_at')
     employees = CustomUser.objects.filter(role='employee')
-    return render(request, 'evaluation/admin_dashboard.html', {'forms': forms, 'employees': employees})
+    
+    # Calculate statistics
+    total_reviews = PeerReview.objects.filter(form__created_by=request.user).count()
+    pending_reviews = 0
+    
+    # Calculate expected vs completed reviews for each form
+    forms_with_stats = []
+    for form in forms:
+        assigned_count = form.assigned_employees.count()
+        expected_reviews_count = assigned_count * (assigned_count - 1) if assigned_count > 1 else 0
+        completed_reviews = PeerReview.objects.filter(form=form).count()
+        
+        forms_with_stats.append({
+            'form': form,
+            'expected_reviews': expected_reviews_count,
+            'completed_reviews': completed_reviews
+        })
+        
+        pending_reviews += expected_reviews_count - completed_reviews
+    
+    return render(request, 'evaluation/admin_dashboard.html', {
+        'forms_with_stats': forms_with_stats,
+        'employees': employees,
+        'total_reviews': total_reviews,
+        'pending_reviews': pending_reviews
+    })
 
 @user_passes_test(is_admin)
 def create_form(request):
@@ -87,17 +112,43 @@ def create_form(request):
         title = request.POST.get('title')
         description = request.POST.get('description', '')
         questions_raw = request.POST.get('questions')
-        target_employee_ids = request.POST.getlist('target_employees')
+        assigned_employee_ids = request.POST.getlist('assigned_employees')
         
         questions = [{'text': q.strip()} for q in questions_raw.strip().split('\n') if q.strip()]
         form = EvaluationForm.objects.create(
-            title=title, description=description, questions=questions, created_by=request.user
+            title=title,
+            description=description,
+            questions=questions,
+            created_by=request.user
         )
-        if target_employee_ids:
-            form.target_employees.set(employees.filter(id__in=target_employee_ids))
-        messages.success(request, 'Evaluation Form created!')
+        
+        if assigned_employee_ids:
+            form.assigned_employees.set(employees.filter(id__in=assigned_employee_ids))
+        
+        messages.success(request, 'Peer Review Form created successfully!')
         return redirect('admin_dashboard')
+    
     return render(request, 'evaluation/create_form.html', {'employees': employees})
+
+@user_passes_test(is_admin)
+def view_reviews(request, form_id):
+    form = get_object_or_404(EvaluationForm, id=form_id, created_by=request.user)
+    reviews = PeerReview.objects.filter(form=form).select_related('reviewer', 'reviewee')
+    
+    # Organize reviews by reviewee
+    reviews_by_reviewee = {}
+    for review in reviews:
+        if review.reviewee.id not in reviews_by_reviewee:
+            reviews_by_reviewee[review.reviewee.id] = {
+                'reviewee': review.reviewee,
+                'reviews': []
+            }
+        reviews_by_reviewee[review.reviewee.id]['reviews'].append(review)
+    
+    return render(request, 'evaluation/view_reviews.html', {
+        'form': form,
+        'reviews_by_reviewee': reviews_by_reviewee
+    })
 
 # Employee views
 def is_employee(user):
@@ -105,35 +156,107 @@ def is_employee(user):
 
 @user_passes_test(is_employee)
 def employee_dashboard(request):
+    # Get forms where user is assigned
     assigned_forms = EvaluationForm.objects.filter(
-        target_employees=request.user, is_active=True
-    ).exclude(
-        evaluationresponse__employee=request.user
+        assigned_employees=request.user,
+        is_active=True
     )
-    completed_forms = EvaluationResponse.objects.filter(employee=request.user)
+    
+    # For each form, get colleagues to review
+    forms_with_colleagues = []
+    for form in assigned_forms:
+        colleagues = form.assigned_employees.exclude(id=request.user.id)
+        reviewed_colleagues = PeerReview.objects.filter(
+            form=form,
+            reviewer=request.user
+        ).values_list('reviewee_id', flat=True)
+        
+        pending_colleagues = colleagues.exclude(id__in=reviewed_colleagues)
+        
+        forms_with_colleagues.append({
+            'form': form,
+            'total_colleagues': colleagues.count(),
+            'reviewed_count': len(reviewed_colleagues),
+            'pending_colleagues': pending_colleagues
+        })
+    
+    completed_reviews = PeerReview.objects.filter(reviewer=request.user)
+    
     return render(request, 'evaluation/employee_dashboard.html', {
-        'assigned_forms': assigned_forms,
-        'completed_forms': completed_forms
+        'forms_with_colleagues': forms_with_colleagues,
+        'completed_reviews': completed_reviews
     })
 
 @user_passes_test(is_employee)
-def fill_form(request, form_id):
+def review_colleague(request, form_id, colleague_id):
     form = get_object_or_404(EvaluationForm, id=form_id, is_active=True)
-    if request.user not in form.target_employees.all():
+    colleague = get_object_or_404(CustomUser, id=colleague_id, role='employee')
+    
+    # Check if user is assigned to this form
+    if request.user not in form.assigned_employees.all():
         messages.error(request, 'You are not assigned to this form')
         return redirect('employee_dashboard')
-    if EvaluationResponse.objects.filter(form=form, employee=request.user).exists():
-        messages.info(request, 'You have already submitted this form')
+    
+    # Check if colleague is also assigned to this form
+    if colleague not in form.assigned_employees.all():
+        messages.error(request, 'This colleague is not assigned to this form')
         return redirect('employee_dashboard')
+    
+    # Check if already reviewed
+    if PeerReview.objects.filter(form=form, reviewer=request.user, reviewee=colleague).exists():
+        messages.info(request, 'You have already reviewed this colleague')
+        return redirect('employee_dashboard')
+    
     if request.method == 'POST':
         responses = {}
-        for i, q in enumerate(form.questions):
+        ml_analysis = {}
+        
+        # Process each question and run ML analysis
+        for i, question in enumerate(form.questions):
             answer = request.POST.get(f"question_{i}", '')
-            responses[q['text']] = answer
-        EvaluationResponse.objects.create(form=form, employee=request.user, responses=responses)
-        messages.success(request, 'Form submitted successfully!')
+            responses[question['text']] = answer
+            
+            # Run ML analysis
+            try:
+                from .ml_models.qpsvc import QuestionClassifier
+                from .ml_models.genprocess import Brain
+                
+                classifier = QuestionClassifier()
+                brain = Brain()
+                
+                category, confidence = classifier.classify(question['text'])
+                
+                if category != "Out of Scope":
+                    prediction = brain.brain(category, answer)
+                else:
+                    prediction = brain.brain("Out of Scope", answer)
+                
+                ml_analysis[question['text']] = {
+                    'category': category,
+                    'confidence': float(confidence),
+                    'prediction': str(prediction)
+                }
+            except Exception as e:
+                ml_analysis[question['text']] = {
+                    'error': str(e)
+                }
+        
+        # Create peer review
+        PeerReview.objects.create(
+            form=form,
+            reviewer=request.user,
+            reviewee=colleague,
+            responses=responses,
+            ml_analysis=ml_analysis
+        )
+        
+        messages.success(request, f'Review for {colleague.username} submitted successfully!')
         return redirect('employee_dashboard')
-    return render(request, 'evaluation/fill_form.html', {'form': form})
+    
+    return render(request, 'evaluation/review_colleague.html', {
+        'form': form,
+        'colleague': colleague
+    })
 
 @login_required
 @csrf_exempt
@@ -144,7 +267,6 @@ def evaluate_response(request):
             question = data.get('question', '')
             answer = data.get('answer', '')
 
-            # Import ML models
             from .ml_models.qpsvc import QuestionClassifier
             from .ml_models.genprocess import Brain
 

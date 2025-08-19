@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Results - {{ form.title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .results-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .reviewee-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .review-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+        }
+
+        .ml-analysis {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .ml-result {
+            margin-bottom: 10px;
+        }
+
+        .confidence-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+
+        .confidence-fill {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            height: 100%;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="results-container">
+        <a href="{% url 'admin_dashboard' %}" class="back-link">← Back to Dashboard</a>
+        
+        <div class="header">
+            <h1>Review Results: {{ form.title }}</h1>
+            <p>Comprehensive peer review analysis with ML insights</p>
+        </div>
+
+        {% for reviewee_id, data in reviews_by_reviewee.items %}
+            <div class="reviewee-section">
+                <h2>Reviews for {{ data.reviewee.username }}</h2>
+                {% if data.reviewee.department %}
+                    <p style="color: #666; margin-bottom: 20px;">Department: {{ data.reviewee.department }}</p>
+                {% endif %}
+
+                {% for review in data.reviews %}
+                    <div class="review-card">
+                        <h4>Review by {{ review.reviewer.username }}</h4>
+                        <p style="color: #666; font-size: 0.9rem;">Submitted: {{ review.submitted_at|date:"M d, Y at H:i" }}</p>
+                        
+                        {% for question, answer in review.responses.items %}
+                            <div style="margin: 15px 0;">
+                                <strong>Q: {{ question }}</strong>
+                                <p style="margin: 8px 0;">{{ answer }}</p>
+                                
+                                {% if review.ml_analysis %}
+                                    {% for ml_question, analysis in review.ml_analysis.items %}
+                                        {% if ml_question == question %}
+                                            <div class="ml-analysis">
+                                                <strong>🤖 ML Analysis:</strong>
+                                                <div class="ml-result">
+                                                    <strong>Category:</strong> {{ analysis.category }}
+                                                </div>
+                                                <div class="ml-result">
+                                                    <strong>Confidence:</strong> {{ analysis.confidence|floatformat:2 }}%
+                                                    <div class="confidence-bar">
+                                                        <div class="confidence-fill" style="width: {{ analysis.confidence }}%"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-result">
+                                                    <strong>Prediction:</strong> {{ analysis.prediction }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% empty %}
+            <div class="reviewee-section">
+                <p style="text-align: center; color: #666;">No reviews submitted yet for this form.</p>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

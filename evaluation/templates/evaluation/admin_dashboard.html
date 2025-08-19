@@ -36,45 +36,34 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .header h1 {
-            color: #333;
+        .stats {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-number {
             font-size: 2rem;
             font-weight: 700;
+            color: #667eea;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #545b62;
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
         }
 
         .content-section {
@@ -85,13 +74,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .section-title {
-            color: #333;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
         .form-card {
             background: #f8f9fa;
             border-radius: 10px;
@@ -100,20 +82,30 @@
             border-left: 4px solid #667eea;
         }
 
-        .form-card h3 {
-            color: #333;
-            margin-bottom: 10px;
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
         }
 
-        .form-card p {
-            color: #666;
-            margin-bottom: 5px;
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
         }
 
-        .empty-state {
-            text-align: center;
-            color: #666;
-            font-style: italic;
+        .btn-view {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
         }
 
         .messages {
@@ -142,10 +134,29 @@
 <body>
     <div class="dashboard-container">
         <div class="header">
-            <h1>Admin Dashboard</h1>
-            <div class="user-info">
-                <span>Welcome, <strong>{{ user.username }}</strong> (Admin)</span>
+            <h1>Admin Dashboard - Peer Reviews</h1>
+            <div>
+                <span>Welcome, <strong>{{ user.username }}</strong></span>
                 <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ forms_with_stats|length }}</div>
+                <div class="stat-label">Forms Created</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total_reviews }}</div>
+                <div class="stat-label">Reviews Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ pending_reviews }}</div>
+                <div class="stat-label">Reviews Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ employees.count }}</div>
+                <div class="stat-label">Total Employees</div>
             </div>
         </div>
 
@@ -161,23 +172,25 @@
 
         <div class="content-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 class="section-title">Evaluation Forms</h2>
-                <a href="{% url 'create_form' %}" class="btn btn-primary">Create New Form</a>
+                <h2>Peer Review Forms</h2>
+                <a href="{% url 'create_form' %}" class="btn btn-primary">Create New Peer Review Form</a>
             </div>
 
-            {% for form in forms %}
+            {% for item in forms_with_stats %}
                 <div class="form-card">
-                    <h3>{{ form.title }}</h3>
-                    <p><strong>Description:</strong> {{ form.description|default:"No description" }}</p>
-                    <p><strong>Questions:</strong> {{ form.questions|length }} questions</p>
-                    <p><strong>Assigned to:</strong> {{ form.target_employees.count }} employees</p>
-                    <p><strong>Created:</strong> {{ form.created_at|date:"M d, Y at H:i" }}</p>
-                    <p><strong>Status:</strong> {% if form.is_active %}Active{% else %}Inactive{% endif %}</p>
+                    <h3>{{ item.form.title }}</h3>
+                    <p><strong>Description:</strong> {{ item.form.description|default:"No description" }}</p>
+                    <p><strong>Questions:</strong> {{ item.form.questions|length }} questions</p>
+                    <p><strong>Assigned Employees:</strong> {{ item.form.assigned_employees.count }}</p>
+                    <p><strong>Expected Reviews:</strong> {{ item.expected_reviews }} total</p>
+                    <p><strong>Completed Reviews:</strong> {{ item.completed_reviews }}</p>
+                    <p><strong>Created:</strong> {{ item.form.created_at|date:"M d, Y at H:i" }}</p>
+                    <div style="margin-top: 15px;">
+                        <a href="{% url 'view_reviews' item.form.id %}" class="btn btn-view">View Reviews & ML Analysis</a>
+                    </div>
                 </div>
             {% empty %}
-                <div class="empty-state">
-                    <p>No forms created yet. Click "Create New Form" to get started!</p>
-                </div>
+                <p style="text-align: center; color: #666;">No peer review forms created yet. Create your first form!</p>
             {% endfor %}
         </div>
     </div>

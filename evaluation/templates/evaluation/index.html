@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Evaluation System</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Employee Performance Evaluation</h1>
+    
+    <div id="evaluation-form">
+        <textarea id="question" placeholder="Enter evaluation question"></textarea>
+        <textarea id="answer" placeholder="Enter response"></textarea>
+        <button onclick="evaluateResponse()">Evaluate</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        function evaluateResponse() {
+            const question = document.getElementById('question').value;
+            const answer = document.getElementById('answer').value;
+            
+            fetch('/evaluate/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    'question': question,
+                    'answer': answer
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('results').innerHTML = `
+                    <h3>Results:</h3>
+                    <p>Category: ${data.category}</p>
+                    <p>Confidence: ${data.confidence}</p>
+                    <p>Prediction: ${data.prediction}</p>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "Melwin",
+  "questions": [
+    {
+      "question": "Does he request for deadline extensions often?",
+      "answers": [
+        "Not often (by Mel2)",
+        "NO never (by Mel3)"
+      ]
+    },
+    {
+      "question": "Does he remain calm when faced with changing deadlines?",
+      "answers": [
+        "Yes he's calm (by Mel2)",
+        "yes very calm he's proffesional (by Mel3)"
+      ]
+    },
+    {
+      "question": "Is he approachable when it comes to collaboration?",
+      "answers": [
+        "No not at all (by Mel2)",
+        "No never (by Mel3)"
+      ]
+    }
+  ]
+}

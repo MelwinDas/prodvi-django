@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'evaluation',
     'rest_framework',
     'corsheaders',
+    'markdownify',
 ]
 
 AUTH_USER_MODEL = 'evaluation.CustomUser'
@@ -133,4 +134,29 @@ SESSION_COOKIE_AGE = 3600  # 1 hour
 # Allow concurrent logins
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-]
+] 
+
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY') 
+API_KEY = os.environ.get('GEMINI_API_KEY')
+
+# In prodvi_project/settings.py
+
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": [
+            'a', 'abbr', 'acronym', 'b', 'blockquote', 'em', 'i', 'li', 'ol',
+            'p', 'strong', 'ul', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'hr',
+        ],
+        "WHITELIST_ATTRS": [
+            'href', 'title', 'alt',
+        ],
+        "MARKDOWN_EXTENSIONS": [
+            'markdown.extensions.fenced_code',
+            'markdown.extensions.extra',
+        ],
+        "WHITELIST_PROTOCOLS": [
+            'http', 'https', 'mailto',
+        ],
+        "STRIP": False,  # Don't strip unrecognized tags
+    }
+}

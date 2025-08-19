@@ -11,10 +11,15 @@ urlpatterns = [
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('create-form/', views.create_form, name='create_form'),
     path('view-reviews/<int:form_id>/', views.view_reviews, name='view_reviews'),
+    path('admin-summaries/<int:form_id>/', views.admin_summaries_list, name='admin_summaries_list'),
+    path('admin-summary/<int:form_id>/<int:employee_id>/', views.admin_employee_summary, name='admin_employee_summary'),
+    path('refresh-summary/<int:form_id>/<int:employee_id>/', views.refresh_employee_summary, name='refresh_employee_summary'),
     
     # Employee paths
     path('employee-dashboard/', views.employee_dashboard, name='employee_dashboard'),
     path('review-colleague/<int:form_id>/<int:colleague_id>/', views.review_colleague, name='review_colleague'),
+    path('my-summary/<int:form_id>/', views.my_summary, name='my_summary'),
+    path('refresh-my-summary/<int:form_id>/', views.refresh_my_summary, name='refresh_my_summary'),  # Add this line
     
     # API
     path('evaluate/', views.evaluate_response, name='evaluate'),

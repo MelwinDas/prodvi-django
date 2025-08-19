@@ -1,106 +1,112 @@
 import os
-import time
+import json
 import google.generativeai as genai
 from django.conf import settings
 
 class FileProcessor:
     def __init__(self, model_name="gemini-1.5-flash"):
-        # Check if API key exists in environment or Django settings
-        api_key = os.environ.get("API_KEY") or getattr(settings, 'GEMINI_API_KEY', None)
+        # Get API key from environment or Django settings
+        api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, 'GEMINI_API_KEY', None)
         if not api_key:
-            raise ValueError("API_KEY not found in environment variables or Django settings")
-            
+            raise ValueError("GEMINI_API_KEY not found in environment variables or Django settings")
+        
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(
-            model_name=model_name,
-            generation_config={
-                "temperature": 1,
-                "top_p": 0.75,
-                "top_k": 40,
-                "max_output_tokens": 8500,
-                "response_mime_type": "text/plain",
-            }
-        )
-        
-        # Get the correct paths to data files
-        self.data_path = os.path.join(settings.BASE_DIR, 'evaluation', 'data')
-        
-        # Initialize with empty files list
-        self.files = []
-        self.chat_session = None
-    
-    def initialize_chat(self):
-        """Initialize chat session with default files"""
-        try:
-            # Initial file paths
-            initial_files = [
-                os.path.join(self.data_path, "larson.txt"),
-                os.path.join(self.data_path, "priya.txt")
-            ]
-            
-            # Upload initial files
-            for file_path in initial_files:
-                if os.path.exists(file_path):
-                    self.files.append(self.upload_to_gemini(file_path, mime_type="text/plain"))
-            
-            # Wait for files to be ready
-            self.wait_for_files_active(self.files)
-            
-            # Start the chat session
-            if self.files:
-                self.chat_session = self.model.start_chat(
-                    history=[
-                        {
-                            "role": "user",
-                            "parts": [
-                                self.files[0],
-                                "Analyze the txt files containing questions and comments given by employees to one of their colleagues. Read it and give feedback about them, including areas to improve, how they can improve, and their strong points.",
-                            ],
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "I'll analyze the employee feedback files and provide insights on areas to improve, suggestions for improvement, and strong points. Please provide the files for analysis.",
-                            ],
-                        }
-                    ]
-                )
-        except Exception as e:
-            print(f"Error initializing chat: {e}")
-    
-    def upload_to_gemini(self, path, mime_type=None):
-        """Uploads the given file to Gemini and returns the file reference."""
-        file = genai.upload_file(path, mime_type=mime_type)
-        print(f"Uploaded file '{file.display_name}' as: {file.uri}")
-        return file
-    
-    def wait_for_files_active(self, files):
-        """Waits for the given files to be active."""
-        print("Waiting for file processing...")
-        for name in (file.name for file in files):
-            file = genai.get_file(name)
-            while file.state.name == "PROCESSING":
-                print(".", end="", flush=True)
-                time.sleep(10)
-                file = genai.get_file(name)
-            if file.state.name != "ACTIVE":
-                raise Exception(f"File {file.name} failed to process")
-        print("...all files ready")
-    
-    def process_new_file(self, file_path):
-        """Uploads a new file, appends it to the list, and returns the response text."""
-        if not self.chat_session:
-            self.initialize_chat()
-        
-        # Upload new file and add it to the files list
-        new_file = self.upload_to_gemini(file_path, mime_type="text/plain")
-        self.files.append(new_file)
-        
-        # Send a message using the newly added file
-        response = self.chat_session.send_message({
-            "role": "user",
-            "parts": [new_file]
-        })
-        return response.text
+        self.model = genai.GenerativeModel(model_name)
 
-# Remove the example usage code that runs during import
+    def process_new_file(self, file_path):
+        """Process file content with Gemini API without file upload"""
+        try:
+            # Read file content directly
+            with open(file_path, 'r', encoding='utf-8') as f:
+                file_content = f.read()
+            
+            # Parse JSON if it's a JSON file
+            if file_path.endswith('.json'):
+                data = json.loads(file_content)
+                formatted_content = self._format_peer_review_data(data)
+            else:
+                formatted_content = file_content
+            
+            # Create comprehensive analysis prompt
+            prompt = f"""
+You are an expert HR analyst. Analyze this employee peer review data and provide a comprehensive performance summary.
+
+PEER REVIEW DATA:
+{formatted_content}
+(Do NOT include a date field in your output.) 
+Please structure bullet points as proper Markdown lists (e.g., - for bullets, 1. 2. for numbered lists) when you generate feedback. Do NOT use extra blank lines.
+Please provide a detailed analysis including:
+
+*PERFORMANCE SUMMARY:*
+- Overall performance rating (Excellent/Good/Satisfactory/Needs Improvement)
+- Key performance indicators from peer feedback
+
+*KEY STRENGTHS:*
+- Top 3-5 strengths identified by colleagues
+- Specific examples from peer feedback
+
+*AREAS FOR IMPROVEMENT:*
+- 2-3 main areas that need development
+- Constructive suggestions for growth
+
+*SPECIFIC RECOMMENDATIONS:*
+- Actionable steps for professional development
+- Skills to focus on improving
+- Training or mentoring suggestions
+
+*PEER FEEDBACK HIGHLIGHTS:*
+- Most positive comments from colleagues
+- Common themes in feedback
+
+Format the response professionally as if it's going into an official performance review document. 
+One Example is this:
+(Employees name), your colleagues recognize your strong work ethic, commitment, and ability to produce high-quality work, often going above and beyond. You are appreciated for being supportive, bringing a positive vibe to the team, and generally being open to collaboration and feedback. Your initiative and reliability in meeting deadlines are definite strengths.
+However, there are a few areas where you can focus on consistent improvement to enhance your overall effectiveness and team integration:
+Communication & Collaboration: While you communicate well and are open to collaboration, there are instances where clarity in articulating your thoughts can be challenging, and a tendency to be stubborn or dismissive of others' suggestions can hinder full team synergy.
+How to improve: Actively practice clarifying your thoughts before speaking. Make a conscious effort to solicit and genuinely consider diverse perspectives, even if they differ from your initial ideas. Engage more proactively in team discussions and ensure your contributions align with collective goals.
+Consistency in Punctuality & Follow-Through: There's mixed feedback regarding your punctuality and consistency in task completion. While you are often on time and meet deadlines, some reports suggest frequent lateness that disrupts the team, missing start times, and occasional failure to follow through on tasks or needing reminders.
+How to improve: Prioritize consistent punctuality and commitment to all tasks. Utilize time management techniques and communicate proactively and early if any delays or issues arise. This will build stronger trust and reinforce your reliability.
+Stress Management: Feedback indicates that you can be challenging to work with when under stress, which affects team dynamics.
+How to improve: Develop and implement strategies for managing stress effectively. This could involve better planning, time blocking, or employing stress-reduction techniques to maintain positive and productive interactions with your team, especially during high-pressure periods.
+By focusing on enhancing consistent communication, ensuring reliable punctuality and follow-through, and developing robust stress management techniques, you will undoubtedly become an even more dependable and seamlessly integrated member of the team.
+            
+speak like a human by taking names of the employee you are evaluating you can also mention comments but never reveal which employee comented that keep everyones name confidential.
+            """
+            
+            # Generate response
+            response = self.model.generate_content(prompt)
+            return response.text
+            
+        except FileNotFoundError:
+            return f"Error: File not found at path {file_path}"
+        except json.JSONDecodeError as e:
+            return f"Error: Invalid JSON format in file - {str(e)}"
+        except Exception as e:
+            return f"Error processing with Gemini API: {str(e)}"
+    
+    def _format_peer_review_data(self, data):
+        """Format JSON peer review data for better analysis"""
+        if not isinstance(data, dict):
+            return str(data)
+        
+        formatted = f"EMPLOYEE: {data.get('name', 'Unknown')}\n\n"
+        
+        questions = data.get('questions', [])
+        for i, question_data in enumerate(questions, 1):
+            question_text = question_data.get('question', f'Question {i}')
+            answers = question_data.get('answers', [])
+            
+            formatted += f"QUESTION {i}: {question_text}\n"
+            formatted += "PEER RESPONSES:\n"
+            
+            for answer in answers:
+                formatted += f"- {answer}\n"
+            formatted += "\n"
+        
+        return formatted
+
+# For backward compatibility
+def process_file(file_path):
+    """Legacy function for backward compatibility"""
+    processor = FileProcessor()
+    return processor.process_new_file(file_path)

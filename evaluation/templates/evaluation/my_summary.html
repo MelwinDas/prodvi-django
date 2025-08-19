@@ -1,0 +1,85 @@
+{% load static %}
+{% load markdownify %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Performance Summary - PRODVI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+.analysis-text {
+    line-height: 1.6;
+    color: #333;
+    font-size: 1.1rem;
+}
+.analysis-text p { margin: 0 0 12px 0; }
+.analysis-text p:empty { display: none; }
+.analysis-text h1, .analysis-text h2, .analysis-text h3, .analysis-text h4 {
+    color: #2c3e50; margin: 20px 0 10px 0; font-weight: 600;
+}
+.analysis-text h1 { font-size: 1.6rem; color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px; }
+.analysis-text h2 { font-size: 1.4rem; color: #3498db; }
+.analysis-text h3 { font-size: 1.2rem; color: #8e44ad; }
+.analysis-text ul, .analysis-text ol { margin: 10px 0 15px 0; padding-left: 25px; }
+.analysis-text li { margin-bottom: 8px; line-height: 1.5; }
+.analysis-text strong { color: #2c3e50; font-weight: 600; }
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh; padding: 20px;
+}
+.summary-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px; padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+.header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; }
+.back-link, .refresh-btn {
+    display: inline-block; margin-bottom: 20px; margin-right: 12px;
+    color: #667eea; text-decoration: none; font-weight: 500;
+    padding: 10px 20px; border: 2px solid #667eea; border-radius: 8px;
+    transition: all 0.3s ease;
+}
+.back-link:hover, .refresh-btn:hover { background: #667eea; color: white; }
+.refresh-btn {
+    border: 2px solid #ffc107; background: #ffe082; color: #333;
+}
+.refresh-btn:hover { background: #ffe082; color: #333; }
+.info-box {
+    background: #e3f2fd; border-left: 4px solid #2196f3;
+    padding: 20px; margin: 20px 0; border-radius: 5px;
+}
+.loading { text-align: center; padding: 50px; color: #666; }
+</style>
+</head>
+<body>
+<div class="summary-container">
+    <a href="{% url 'employee_dashboard' %}" class="back-link">← Back to Dashboard</a>
+    <a href="{% url 'refresh_my_summary' form.id %}" class="refresh-btn">🔄 Refresh My Analysis</a>
+    <div class="header">
+        <h1>My Performance Summary</h1>
+        <p>{{ form.title }} - AI-Powered Analysis</p>
+    </div>
+    <div class="info-box">
+        <p><strong>Employee:</strong> {{ employee.username }}</p>
+        <p><strong>Department:</strong> {{ employee.department|default:"Not specified" }}</p>
+        <p><strong>Evaluation Form:</strong> {{ form.title }}</p>
+        <p><strong>Total Questions:</strong> {{ form.questions|length }}</p>
+    </div>
+    {% if summary.gemini_analysis %}
+        <div class="analysis-text">{{ summary.gemini_analysis|markdownify }}</div>
+    {% else %}
+        <div class="loading">
+            <h3>⏳ Generating Your Performance Summary...</h3>
+            <p>Your AI-powered performance analysis is being generated. Please check back in a few moments.</p>
+            <p style="margin-top: 15px;">
+                <a href="{% url 'refresh_my_summary' form.id %}" class="refresh-btn">🔄 Generate Summary</a>
+            </p>
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>

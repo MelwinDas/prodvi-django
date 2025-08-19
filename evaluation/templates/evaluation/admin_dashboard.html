@@ -91,6 +91,7 @@
             border: none;
             cursor: pointer;
             margin-right: 10px;
+            display: inline-block;
         }
 
         .btn-primary {
@@ -100,6 +101,11 @@
 
         .btn-view {
             background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+
+        .btn-summary {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
             color: white;
         }
 
@@ -128,6 +134,17 @@
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-group {
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -171,7 +188,7 @@
         {% endif %}
 
         <div class="content-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div class="section-header">
                 <h2>Peer Review Forms</h2>
                 <a href="{% url 'create_form' %}" class="btn btn-primary">Create New Peer Review Form</a>
             </div>
@@ -185,8 +202,10 @@
                     <p><strong>Expected Reviews:</strong> {{ item.expected_reviews }} total</p>
                     <p><strong>Completed Reviews:</strong> {{ item.completed_reviews }}</p>
                     <p><strong>Created:</strong> {{ item.form.created_at|date:"M d, Y at H:i" }}</p>
-                    <div style="margin-top: 15px;">
+                    
+                    <div class="btn-group">
                         <a href="{% url 'view_reviews' item.form.id %}" class="btn btn-view">View Reviews & ML Analysis</a>
+                        <a href="{% url 'admin_summaries_list' item.form.id %}" class="btn btn-summary">Performance Summaries</a>
                     </div>
                 </div>
             {% empty %}

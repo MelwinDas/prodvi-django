@@ -76,10 +76,17 @@
             border: none;
             cursor: pointer;
             font-size: 0.9rem;
+            display: inline-block;
+            margin: 5px;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+
+        .btn-summary {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
             color: white;
         }
 
@@ -126,6 +133,19 @@
             background: #d1ecf1;
             color: #0c5460;
         }
+
+        .section-header {
+            margin-bottom: 20px;
+        }
+
+        .btn-group {
+            margin-top: 15px;
+        }
+
+        .status-complete {
+            color: #28a745;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -149,7 +169,10 @@
         {% endif %}
 
         <div class="content-section">
-            <h2>Assigned Peer Reviews</h2>
+            <div class="section-header">
+                <h2>Assigned Peer Reviews</h2>
+            </div>
+            
             {% for item in forms_with_colleagues %}
                 <div class="form-card">
                     <h3>{{ item.form.title }}</h3>
@@ -174,8 +197,12 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p style="color: #28a745; font-weight: 500; margin-top: 15px;">✅ All colleagues reviewed for this form!</p>
+                        <p class="status-complete" style="margin-top: 15px;">✅ All colleagues reviewed for this form!</p>
                     {% endif %}
+
+                    <div class="btn-group">
+                        <a href="{% url 'my_summary' item.form.id %}" class="btn btn-summary">View My Performance Summary</a>
+                    </div>
                 </div>
             {% empty %}
                 <p style="text-align: center; color: #666;">No peer review forms assigned to you at the moment.</p>
@@ -183,7 +210,10 @@
         </div>
 
         <div class="content-section">
-            <h2>Completed Reviews</h2>
+            <div class="section-header">
+                <h2>Completed Reviews</h2>
+            </div>
+            
             {% for review in completed_reviews %}
                 <div class="form-card" style="border-left-color: #28a745;">
                     <h4>{{ review.form.title }}</h4>

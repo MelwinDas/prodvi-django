@@ -36,6 +36,19 @@ class PeerReview(models.Model):
     def __str__(self):
         return f"{self.reviewer.username} reviews {self.reviewee.username} - {self.form.title}"
 
+class EmployeeSummary(models.Model):
+    employee = models.ForeignKey('evaluation.CustomUser', on_delete=models.CASCADE)
+    form = models.ForeignKey(EvaluationForm, on_delete=models.CASCADE)
+    summary_file_path = models.CharField(max_length=500, blank=True)
+    gemini_analysis = models.TextField(blank=True)  # Store Gemini API response
+    generated_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['employee', 'form']
+    
+    def __str__(self):
+        return f"Summary: {self.employee.username} - {self.form.title}"
+
 # Keep for backward compatibility if needed
 class EvaluationResponse(models.Model):
     form = models.ForeignKey(EvaluationForm, on_delete=models.CASCADE)

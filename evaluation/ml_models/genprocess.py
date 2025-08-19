@@ -5,28 +5,30 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from nltk.sentiment import SentimentIntensityAnalyzer
 
 class Brain:
     def __init__(self):
-        # Get the path to the evaluation app directory
         self.base_path = os.path.join(settings.BASE_DIR, 'evaluation', 'data')
-    
+
     def brain(self, column, comment):
         if column == "Out of Scope":
             score = SentimentIntensityAnalyzer().polarity_scores(comment)
             print(score)
             return score
         else:
-            # Load the dataset with correct path
             csv_path = os.path.join(self.base_path, 'prodvi-dataset-new4.csv')
             df = pd.read_csv(csv_path)
             
-            # Split the column
-            df[['Text', 'Label']] = df[column].str.split('(', expand=True)
-            df['Label'] = df['Label'].replace(r'\)', '', regex=True)
+            column = column.strip()
             
-            # Define features and target as Series
+            if column not in df.columns:
+                print(f"Column {column} not found in dataset")
+                return "Column not found in dataset"
+            
+            df[['Text', 'Label']] = df[column].str.split('(', expand=True)
+            df['Label'] = df['Label'].str.replace(')', '')
+            
             x = df['Text']
             y = df['Label']
             
@@ -47,18 +49,12 @@ class Brain:
                 'Emotional_Intelligence': 18730
             }
             
-            # Ensure correct random_state based on column key
             random_state = columnlist.get(column, 42)
             
-            # Split the data into training and test sets
             X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=random_state)
             
-            # Define and train the SVC pipeline
-            pipeSVC = Pipeline([('tfidf', TfidfVectorizer()), ('clf', LinearSVC())])
+            pipeSVC = Pipeline([('tfidf', TfidfVectorizer()), ('clf', LinearSVC(dual=False))])
             pipeSVC.fit(X_train, y_train)
             
-            # Predict using the SVC model
             prediction = pipeSVC.predict([comment])
             return prediction[0]
-
-# Remove the example usage code that runs during import

@@ -1,0 +1,260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRODVI Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-name {
+            color: white;
+            font-weight: 500;
+        }
+        
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: #ff3742;
+            transform: translateY(-2px);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+        
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .result h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .result-item {
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        .messages {
+            margin-bottom: 1rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PRODVI Dashboard</h1>
+        <div class="user-info">
+            <span class="user-name">Welcome, {{ user.username }}!</span>
+            <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #333;">Employee Evaluation System</h2>
+            
+            <form id="evaluationForm">
+                <div class="form-group">
+                    <label for="question">Question:</label>
+                    <input type="text" id="question" name="question" placeholder="Enter your evaluation question..." required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="answer">Answer:</label>
+                    <textarea id="answer" name="answer" placeholder="Enter the employee's response or behavior description..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn">Evaluate Response</button>
+            </form>
+            
+            <div id="result" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('evaluationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const question = document.getElementById('question').value;
+            const answer = document.getElementById('answer').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/evaluate/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        answer: answer
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            <h3>Evaluation Result</h3>
+                            <div class="result-item"><strong>Category:</strong> ${data.category}</div>
+                            <div class="result-item"><strong>Confidence:</strong> ${data.confidence.toFixed(2)}</div>
+                            <div class="result-item"><strong>Prediction:</strong> ${data.prediction}</div>
+                        </div>
+                    `;
+                    resultDiv.style.display = 'block';
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="padding: 1rem; background: #f8d7da; color: #721c24; border-radius: 10px;">
+                            <strong>Error:</strong> ${data.error || 'Evaluation failed'}
+                        </div>
+                    `;
+                    resultDiv.style.display = 'block';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div style="padding: 1rem; background: #f8d7da; color: #721c24; border-radius: 10px;">
+                        <strong>Error:</strong> Network error occurred
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

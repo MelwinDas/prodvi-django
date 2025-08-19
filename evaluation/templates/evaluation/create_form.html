@@ -1,0 +1,191 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Form - PRODVI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header h1 {
+            color: #333;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .employee-selection {
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .employee-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .employee-item:last-child {
+            border-bottom: none;
+        }
+
+        .employee-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: auto;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <a href="{% url 'admin_dashboard' %}" class="back-link">← Back to Dashboard</a>
+        
+        <div class="form-header">
+            <h1>Create Evaluation Form</h1>
+            <p>Design a new evaluation form for your employees</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="title">Form Title</label>
+                <input type="text" name="title" id="title" required placeholder="e.g., Monthly Performance Review">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description (Optional)</label>
+                <textarea name="description" id="description" placeholder="Brief description of this evaluation form..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="questions">Questions</label>
+                <textarea name="questions" id="questions" required placeholder="Enter each question on a new line:&#10;&#10;How would you rate your communication skills?&#10;What are your key achievements this month?&#10;How do you handle challenging situations?"></textarea>
+                <div class="help-text">Enter each question on a separate line</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Assign to Employees</label>
+                <div class="employee-selection">
+                    {% for employee in employees %}
+                        <div class="employee-item">
+                            <input type="checkbox" name="target_employees" value="{{ employee.id }}" id="emp_{{ employee.id }}">
+                            <label for="emp_{{ employee.id }}">
+                                {{ employee.username }} 
+                                {% if employee.department %}({{ employee.department }}){% endif %}
+                                {% if employee.email %}- {{ employee.email }}{% endif %}
+                            </label>
+                        </div>
+                    {% empty %}
+                        <p>No employees found. Create employee accounts first.</p>
+                    {% endfor %}
+                </div>
+                <div class="help-text">Select which employees should fill this form</div>
+            </div>
+            
+            <button type="submit" class="submit-btn">Create Form</button>
+        </form>
+    </div>
+</body>
+</html>

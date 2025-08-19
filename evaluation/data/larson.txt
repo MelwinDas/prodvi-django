@@ -1,0 +1,86 @@
+
+{
+name="Larson",
+questions=[
+    {
+        question="Is the employee easy to work with?",
+        answers=[
+                "He’s always supportive and brings a great vibe to the team. (Very Easy)",
+                "He communicates well and is open to collaboration. (Easy)",
+                "He’s respectful of others’ opinions, which makes working with him pleasant. (Easy)",
+                "He’s a reliable teammate who meets deadlines without issue. (Very Easy)",
+                "He’s generally easy to work with, but can be a bit focused on details sometimes. (Neutral)",
+                "He can be a bit stubborn when it comes to his ideas, but overall he’s good to work with. (Neutral)",
+                "Sometimes he struggles to communicate his thoughts clearly. (Difficult)",
+                "He can be challenging to work with when under stress, which affects the team. (Difficult)",
+                "He has a tendency to dismiss others’ suggestions, which makes collaboration tough. (Very Difficult)",
+                "He handles feedback well and adapts quickly to changes. (Very Easy)"
+                ]
+    },
+    {
+        question="What are his areas to improve?",
+        answers=[
+                "Time management could help him meet deadlines more comfortably. (Time Management)",
+                "Improving his technical skills would enhance his contributions to projects. (Technical Skills)",
+                "He could work on clearer communication to avoid misunderstandings. (Communication)",
+                "Strengthening team collaboration skills would benefit group dynamics. (Team Collaboration)",
+                "Enhancing problem-solving abilities would help him tackle challenges more effectively. (Problem Solving)",
+                "He could benefit from being more creative in his approach to projects. (Creativity)",
+                "Developing leadership skills could help him guide the team more effectively. (Leadership)",
+                "Paying more attention to detail would improve the quality of his work. (Attention to Detail)",
+                "He performs well overall; there are no significant areas to improve. (None)",
+                "He could work on managing stress to improve his interactions with the team. (None)"
+
+                ]
+
+    } 
+    {
+        question="How would you rate his cooperation with the team?",
+        answers=[
+                "He consistently goes out of his way to help others and collaborate effectively. (Highly Cooperative)",
+                "He works well with the team and is always willing to assist. (Cooperative)",
+                "He participates in team discussions but could engage more actively. (Neutral)",
+                "He sometimes prefers to work independently rather than collaborating. (Not Cooperative)",
+                "He often resists team input, which makes collaboration challenging. (Very Uncooperative)",
+                "He’s great at sharing resources and information with teammates. (Highly Cooperative)",
+                "He listens to others and integrates their ideas into his work. (Cooperative)",
+                "He completes his tasks but tends to keep to himself. (Neutral)",
+                "He struggles to align with the team’s goals and priorities. (Not Cooperative)",
+                "He rarely communicates with team members, leading to disconnects. (Very Uncooperative)"
+                ]
+    } 
+    {
+        question="How would you evaluate his work ethics?",
+        answers=[
+                "He demonstrates a strong commitment to his work and goes above and beyond. (Excellent)",
+                "He consistently produces high-quality work and meets expectations. (Good)",
+                "He meets basic expectations but could put in more effort. (Average)",
+                "He occasionally misses deadlines and lacks motivation. (Poor)",
+                "He often fails to follow through on tasks, which affects the team. (Very Poor)",
+                "He takes initiative and shows great responsibility in his role. (Excellent)",
+                "He adheres to guidelines but could improve his attention to detail. (Good)",
+                "He does the minimum required but shows potential for more. (Average)",
+                "He struggles to stay focused and often needs reminders. (Poor)",
+                "He frequently makes excuses for incomplete work. (Very Poor)"
+                ]
+
+    } 
+    {
+        question="How would you describe his punctuality?",
+        answers=[
+                "He is always on time and never misses a deadline. (Always on time)",
+                "He is usually punctual and rarely late for meetings. (Usually on time)",
+                "He is sometimes late but generally manages to catch up. (Sometimes Late)",
+                "He frequently arrives late, which disrupts team activities. (Frequently Late)",
+                "He often misses start times, which impacts his reliability. (Frequently Late)",
+                "He consistently arrives early and prepares in advance. (Always on time)",
+                "He is usually on time, making him a dependable team member. (Usually on time)",
+                "He has been known to arrive late but communicates when he will be. (Sometimes Late)",
+                "He is often late without notifying anyone in advance. (Frequently Late)",
+                "He rarely shows up on time and often leaves early. (Frequently Late)"
+                ]
+
+    }
+          ]
+
+}

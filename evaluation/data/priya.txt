@@ -1,0 +1,80 @@
+{
+  "name": "Priya",
+  "questions": [
+    {
+      "question": "Is the employee easy to work with?",
+      "answers": [
+        "She brings positive energy to the team and supports everyone. (Very Easy)",
+        "She communicates clearly and collaborates smoothly. (Easy)",
+        "She respects others' opinions and listens well. (Easy)",
+        "She completes her tasks on time, making her easy to work with. (Very Easy)",
+        "She can be detail-oriented, which sometimes slows down projects. (Neutral)",
+        "She tends to focus on her ideas, but overall is manageable to work with. (Neutral)",
+        "She occasionally struggles to articulate her thoughts, which can cause confusion. (Difficult)",
+        "She finds it challenging to adapt under stress, which affects collaboration. (Difficult)",
+        "She is often dismissive of feedback, making teamwork harder. (Very Difficult)",
+        "She quickly adjusts to feedback, making collaboration smooth. (Very Easy)"
+      ]
+    },
+    {
+      "question": "What are her areas to improve?",
+      "answers": [
+        "Improving time management could help her meet deadlines more easily. (Time Management)",
+        "Strengthening her technical skills would add value to her contributions. (Technical Skills)",
+        "Clearer communication would reduce misunderstandings within the team. (Communication)",
+        "Working on team collaboration skills could enhance group projects. (Team Collaboration)",
+        "Improving problem-solving abilities would allow her to tackle challenges effectively. (Problem Solving)",
+        "She could use a more creative approach in her project work. (Creativity)",
+        "Building leadership skills could help her take on more responsibility. (Leadership)",
+        "Focusing on attention to detail would reduce errors in her work. (Attention to Detail)",
+        "She performs well in most areas and does not need major improvements. (None)",
+        "Managing stress better would improve her interactions with colleagues. (None)"
+      ]
+    },
+    {
+      "question": "How would you rate her cooperation with the team?",
+      "answers": [
+        "She often assists others and works well in a collaborative setting. (Highly Cooperative)",
+        "She is usually willing to help and contributes positively to the team. (Cooperative)",
+        "She joins team discussions but could participate more actively. (Neutral)",
+        "She tends to work alone and doesn’t always seek input from others. (Not Cooperative)",
+        "She frequently resists team feedback, which disrupts collaboration. (Very Uncooperative)",
+        "She proactively shares information and resources with teammates. (Highly Cooperative)",
+        "She values others’ input and incorporates it into her work. (Cooperative)",
+        "She completes her tasks but rarely interacts with team members. (Neutral)",
+        "She struggles to align with the team’s objectives. (Not Cooperative)",
+        "She avoids team discussions, which limits her connection with others. (Very Uncooperative)"
+      ]
+    },
+    {
+      "question": "How would you evaluate her work ethics?",
+      "answers": [
+        "She is dedicated to her work and often goes above expectations. (Excellent)",
+        "She meets job requirements consistently and produces solid work. (Good)",
+        "She meets minimum expectations but could improve her effort. (Average)",
+        "She sometimes misses deadlines and appears unmotivated. (Poor)",
+        "She frequently fails to complete tasks, impacting the team. (Very Poor)",
+        "She shows responsibility and takes initiative in her role. (Excellent)",
+        "She generally adheres to guidelines but could be more thorough. (Good)",
+        "She meets basic requirements but could take more ownership. (Average)",
+        "She occasionally needs reminders to stay on task. (Poor)",
+        "She often does not follow through on her commitments. (Very Poor)"
+      ]
+    },
+    {
+      "question": "How would you describe her punctuality?",
+      "answers": [
+        "She is always on time and adheres to her schedule consistently. (Always on time)",
+        "She is generally punctual with rare instances of delay. (Usually on time)",
+        "She is occasionally late but typically catches up quickly. (Sometimes Late)",
+        "She often arrives late, which disrupts the team’s flow. (Frequently Late)",
+        "She frequently misses start times, impacting her reliability. (Frequently Late)",
+        "She arrives early and prepares ahead of schedule. (Always on time)",
+        "She is dependable and usually on time for her commitments. (Usually on time)",
+        "She sometimes informs in advance if she’ll be late. (Sometimes Late)",
+        "She often does not inform anyone about her delays. (Frequently Late)",
+        "She rarely shows up on time, which impacts the team. (Frequently Late)"
+      ]
+    }
+  ]
+}

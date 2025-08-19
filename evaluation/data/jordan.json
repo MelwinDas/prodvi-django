@@ -1,0 +1,80 @@
+{
+  "name": "jordan",
+  "questions": [
+    {
+      "question": "is the employee easy to work with?",
+      "answers": [
+        "he fosters a positive work environment and is always approachable. (very easy)",
+        "he communicates effectively and is willing to collaborate. (easy)",
+        "he respects team opinions, making interactions pleasant. (easy)",
+        "he completes his work on time, making him a reliable team member. (very easy)",
+        "he sometimes focuses too much on details, slowing down processes. (neutral)",
+        "he can be set in his ways, but overall is cooperative. (neutral)",
+        "he occasionally has difficulty expressing his ideas, causing minor confusion. (difficult)",
+        "he finds it challenging to handle stress, which affects team dynamics. (difficult)",
+        "he tends to disregard feedback, making teamwork difficult. (very difficult)",
+        "he is quick to adapt and values constructive feedback. (very easy)"
+      ]
+    },
+    {
+      "question": "what are his areas to improve?",
+      "answers": [
+        "better time management could help him meet deadlines more easily. (time management)",
+        "improving technical skills would boost his project contributions. (technical skills)",
+        "clearer communication would help avoid misunderstandings. (communication)",
+        "enhancing his collaboration skills would improve team projects. (team collaboration)",
+        "focusing on problem-solving would help him tackle challenges effectively. (problem solving)",
+        "he could benefit from a more creative approach to his work. (creativity)",
+        "developing leadership skills could enable him to guide projects. (leadership)",
+        "improving attention to detail would enhance the quality of his work. (attention to detail)",
+        "overall, he performs well and doesn’t need major improvements. (none)",
+        "managing stress more effectively would benefit his team interactions. (none)"
+      ]
+    },
+    {
+      "question": "how would you rate his cooperation with the team?",
+      "answers": [
+        "he goes above and beyond to assist and collaborate with others. (highly cooperative)",
+        "he works well with the team and frequently offers help. (cooperative)",
+        "he participates in discussions but could engage more actively. (neutral)",
+        "he often prefers to work independently rather than collaboratively. (not cooperative)",
+        "he resists team feedback, which makes collaboration difficult. (very uncooperative)",
+        "he is proactive in sharing resources with the team. (highly cooperative)",
+        "he integrates others’ ideas into his work when possible. (cooperative)",
+        "he completes his work but tends to keep to himself. (neutral)",
+        "he struggles to align with the team’s objectives. (not cooperative)",
+        "he avoids team discussions, which limits his collaboration. (very uncooperative)"
+      ]
+    },
+    {
+      "question": "how would you evaluate his work ethics?",
+      "answers": [
+        "he is dedicated to his work and often goes beyond expectations. (excellent)",
+        "he consistently meets job requirements and produces good work. (good)",
+        "he meets basic expectations but could increase his effort. (average)",
+        "he occasionally misses deadlines and shows signs of low motivation. (poor)",
+        "he frequently fails to follow through on his tasks. (very poor)",
+        "he demonstrates responsibility and takes initiative. (excellent)",
+        "he adheres to guidelines but could improve his attention to detail. (good)",
+        "he does the minimum required but shows potential for growth. (average)",
+        "he sometimes struggles to stay focused and needs reminders. (poor)",
+        "he frequently needs support to complete his responsibilities. (very poor)"
+      ]
+    },
+    {
+      "question": "how would you describe his punctuality?",
+      "answers": [
+        "he is always on time and dependable. (always on time)",
+        "he is generally punctual with only rare delays. (usually on time)",
+        "he is sometimes late but generally catches up on his work. (sometimes late)",
+        "he frequently arrives late, which disrupts team activities. (frequently late)",
+        "he often misses start times, impacting his reliability. (frequently late)",
+        "he consistently arrives early and is well-prepared. (always on time)",
+        "he is usually on time, making him a dependable team member. (usually on time)",
+        "he occasionally arrives late but informs the team in advance. (sometimes late)",
+        "he often fails to notify anyone when he’ll be late. (frequently late)",
+        "he is rarely on time, which affects team productivity. (frequently late)"
+      ]
+    }
+  ]
+}

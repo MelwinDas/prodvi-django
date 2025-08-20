@@ -9,10 +9,10 @@
 - [ ] Test all functionality locally
 
 ## Environment Variables to Set:
-- DJANGO_SECRET_KEY
+- SECRET_KEY
 - DJANGO_ENV=production
 - GEMINI_API_KEY
-- DATABASE_URL (if using external DB)
+- DATABASE_URL 
 
 ## Post-Deployment:
 - [ ] Create superuser: `python manage.py createsuperuser`

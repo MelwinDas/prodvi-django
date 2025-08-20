@@ -37,17 +37,26 @@ body {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; }
-.back-link, .refresh-btn {
+.back-link, .refresh-btn, .analytics-btn {
     display: inline-block; margin-bottom: 20px; margin-right: 12px;
     color: #667eea; text-decoration: none; font-weight: 500;
     padding: 10px 20px; border: 2px solid #667eea; border-radius: 8px;
     transition: all 0.3s ease;
 }
-.back-link:hover, .refresh-btn:hover { background: #667eea; color: white; }
+.back-link:hover, .refresh-btn:hover, .analytics-btn:hover { background: #667eea; color: white; }
 .refresh-btn {
     border: 2px solid #ffc107; background: #ffe082; color: #333;
 }
 .refresh-btn:hover { background: #ffe082; color: #333; }
+.analytics-btn {
+    border: 2px solid #ff9800;
+    background: linear-gradient(135deg, #ffc107 0%, #ff8b07 100%);
+    color: #333;
+}
+.analytics-btn:hover {
+    background: #ffd54f;
+    color: #111;
+}
 .info-box {
     background: #e3f2fd; border-left: 4px solid #2196f3;
     padding: 20px; margin: 20px 0; border-radius: 5px;
@@ -59,6 +68,8 @@ body {
 <div class="summary-container">
     <a href="{% url 'employee_dashboard' %}" class="back-link">← Back to Dashboard</a>
     <a href="{% url 'refresh_my_summary' form.id %}" class="refresh-btn">🔄 Refresh My Analysis</a>
+    <!-- NEW: Analytics Button -->
+    <a href="{% url 'my_output' form.id %}" class="analytics-btn">📊 View My Analytics</a>
     <div class="header">
         <h1>My Performance Summary</h1>
         <p>{{ form.title }} - AI-Powered Analysis</p>

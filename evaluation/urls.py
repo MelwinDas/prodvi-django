@@ -21,6 +21,9 @@ urlpatterns = [
     path('my-summary/<int:form_id>/', views.my_summary, name='my_summary'),
     path('refresh-my-summary/<int:form_id>/', views.refresh_my_summary, name='refresh_my_summary'),  # Add this line
     
+    path('output/<int:form_id>/<int:employee_id>/', views.performance_output, name='performance_output'),
+    path('my-output/<int:form_id>/', views.my_output, name='my_output'),
+
     # API
     path('evaluate/', views.evaluate_response, name='evaluate'),
 ]

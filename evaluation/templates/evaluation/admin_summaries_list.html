@@ -12,19 +12,16 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-
         .header {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
@@ -32,14 +29,12 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
-
         .content-section {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
-
         .employee-card {
             background: #f8f9fa;
             border-radius: 10px;
@@ -50,34 +45,33 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .employee-card.pending {
             border-left-color: #ffc107;
         }
-
         .btn {
             padding: 10px 20px;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s ease;
+            margin-right: 8px;
         }
-
         .btn-primary {
             background: #007bff;
             color: white;
         }
-
         .btn-secondary {
             background: #6c757d;
             color: white;
         }
-
         .btn-warning {
             background: #ffc107;
             color: #333;
         }
-
+        .btn-analytics {
+            background: linear-gradient(135deg, #ffc107 0%, #ff8b07 100%);
+            color: #333;
+        }
         .back-link {
             display: inline-block;
             margin-bottom: 20px;
@@ -85,19 +79,16 @@
             text-decoration: none;
             font-weight: 500;
         }
-
         .status-badge {
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
         }
-
         .status-ready {
             background: #d4edda;
             color: #155724;
         }
-
         .status-pending {
             background: #fff3cd;
             color: #856404;
@@ -132,6 +123,10 @@
                         {% if data.has_summary %}
                             <a href="{% url 'admin_employee_summary' form.id data.employee.id %}" class="btn btn-primary">
                                 View Summary
+                            </a>
+                            <!-- NEW: Analytics Dashboard Button -->
+                            <a href="{% url 'performance_output' form.id data.employee.id %}" class="btn btn-analytics">
+                                📊 Analytics Dashboard
                             </a>
                         {% else %}
                             <span class="btn btn-warning">Not Ready</span>

@@ -10,7 +10,11 @@ import json
 import traceback
 import os
 from django.conf import settings
-from django.utils import timezone
+from django.utils import timezone 
+from .models import *
+from dotenv import load_dotenv
+load_dotenv()
+
 
 def landing_page(request):
     return render(request, 'evaluation/landing_page.html')
@@ -542,3 +546,91 @@ def refresh_my_summary(request, form_id):
         messages.error(request, f'Error refreshing summary: {str(e)}')
     
     return redirect('my_summary', form_id=form.id)
+
+@login_required
+def performance_output(request, form_id, employee_id):
+    """Shared performance output page for both admins and employees"""
+    form = get_object_or_404(EvaluationForm, id=form_id)
+    employee = get_object_or_404(CustomUser, id=employee_id, role='employee')
+    
+    # Check permissions
+    if request.user.role == 'admin':
+        if form.created_by != request.user:
+            messages.error(request, 'You can only view outputs for your own forms.')
+            return redirect('admin_dashboard')
+    else:
+        if request.user != employee:
+            messages.error(request, 'You can only view your own performance output.')
+            return redirect('employee_dashboard')
+        
+        if request.user not in form.assigned_employees.all():
+            messages.error(request, 'You are not assigned to this form.')
+            return redirect('employee_dashboard')
+    
+    # Get all reviews for this employee and form
+    reviews = PeerReview.objects.filter(reviewee=employee, form=form)
+    
+    # Calculate ML rating distribution
+    rating_counts = {'Excellent': 0, 'Good': 0, 'Average': 0, 'Needs Improvement': 0}
+    total_answers = 0
+    total_score = 0
+    
+    for review in reviews:
+        try:
+            # FIXED: Use correct field name
+            answers = json.loads(review.review_data)
+            for answer_data in answers:
+                if 'ml_rating' in answer_data:
+                    rating = answer_data['ml_rating']
+                    if rating in rating_counts:
+                        rating_counts[rating] += 1
+                    total_answers += 1
+                    
+                    # Calculate score (Excellent=5, Good=4, Average=3, Needs Improvement=2)
+                    score_map = {'Excellent': 5, 'Good': 4, 'Average': 3, 'Needs Improvement': 2}
+                    total_score += score_map.get(rating, 0)
+        except Exception as e:
+            print(f"Error processing review: {e}")
+            continue
+    
+    # Calculate overall score
+    overall_score = (total_score / total_answers) if total_answers > 0 else 0
+    
+    # Get or create summary for Gemini conclusion
+    try:
+        summary = EmployeeSummary.objects.get(employee=employee, form=form)
+        gemini_conclusion = summary.gemini_analysis
+    except EmployeeSummary.DoesNotExist:
+        gemini_conclusion = None
+    
+    # Prepare chart data
+    labels_pie = list(rating_counts.keys())
+    data_pie = list(rating_counts.values())
+    
+    # Mock growth data (replace with actual historical data)
+    labels_line = ['Review 1', 'Review 2', 'Review 3', 'Review 4', 'Current']
+    data_line = [3.0, 3.2, 3.5, 3.8, max(overall_score, 1.0)]
+    
+    context = {
+        'employee': employee,
+        'form': form,
+        'total_reviews': reviews.count(),
+        'overall_score': overall_score,
+        'total_answers': total_answers,
+        'excellent_count': rating_counts['Excellent'],
+        'improvement_areas': rating_counts['Needs Improvement'],
+        'labels_pie': json.dumps(labels_pie),
+        'data_pie': json.dumps(data_pie),
+        'labels_line': json.dumps(labels_line),
+        'data_line': json.dumps(data_line),
+        'gemini_conclusion': gemini_conclusion,
+    }
+    
+    return render(request, 'evaluation/output.html', context)
+
+
+# Employee view (their own output)
+@user_passes_test(is_employee)
+def my_output(request, form_id):
+    """Employee viewing their own performance output"""
+    return performance_output(request, form_id, request.user.id)

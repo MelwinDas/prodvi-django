@@ -27,7 +27,7 @@ except ImportError:
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-plg-8e9mz_s((9p@qo#)@ms@-p0$3r%g1j%p--pk-8-+l_@p=^')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '*e!v3)5rcj0ujd6nkyh#^dped#lbj9)5x@+s&w7kissdfees$e')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_ENV', 'development') != 'production'
@@ -233,3 +233,18 @@ LOGGING = {
         },
     },
 }
+if 'RENDER' in os.environ:
+    DEBUG = False
+    ALLOWED_HOSTS = ['.onrender.com']
+    
+    # Use environment variables
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    
+    # Database
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    }
+    
+    # Static files
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

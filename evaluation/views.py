@@ -5,12 +5,13 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
-from .models import CustomUser, EvaluationForm, EvaluationResponse, PeerReview, EmployeeSummary 
+from .models import CustomUser, EvaluationForm, EvaluationResponse, PeerReview, EmployeeSummary
+from collections import defaultdict
 import json
 import traceback
 import os
 from django.conf import settings
-from django.utils import timezone 
+from django.utils import timezone
 from .models import *
 from dotenv import load_dotenv
 load_dotenv()
@@ -113,12 +114,19 @@ def admin_dashboard(request):
 @user_passes_test(is_admin)
 def create_form(request):
     employees = CustomUser.objects.filter(role='employee')
+
+    # group employees by department
+    departments = defaultdict(list)
+    for emp in employees:
+        dept_name = emp.department or "No Department"
+        departments[dept_name].append(emp)
+
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description', '')
         questions_raw = request.POST.get('questions')
         assigned_employee_ids = request.POST.getlist('assigned_employees')
-        
+
         questions = [{'text': q.strip()} for q in questions_raw.strip().split('\n') if q.strip()]
         form = EvaluationForm.objects.create(
             title=title,
@@ -126,14 +134,16 @@ def create_form(request):
             questions=questions,
             created_by=request.user
         )
-        
+
         if assigned_employee_ids:
-            form.assigned_employees.set(employees.filter(id__in=assigned_employee_ids))
-        
+            form.assigned_employees.set(CustomUser.objects.filter(id__in=assigned_employee_ids))
+
         messages.success(request, 'Peer Review Form created successfully!')
         return redirect('admin_dashboard')
-    
-    return render(request, 'evaluation/create_form.html', {'employees': employees})
+
+    return render(request, 'evaluation/create_form.html', {
+        'departments': dict(departments)  # Pass departments to template
+    })
 
 @user_passes_test(is_admin)
 def view_reviews(request, form_id):
@@ -239,7 +249,7 @@ def review_colleague(request, form_id, colleague_id):
                 ml_analysis[question['text']] = {
                     'category': category,
                     'confidence': float(confidence),
-                    'prediction': str(prediction)
+                    'prediction': str(prediction)  # expected to be one of: Excellent/Good/Average/Needs Improvement
                 }
             except Exception as e:
                 ml_analysis[question['text']] = {
@@ -314,7 +324,7 @@ def generate_summary_file(employee, form):
     if not reviews.exists():
         return None
     
-    # Create summary data in format like your examples
+    # Create summary data
     summary_data = {
         "name": employee.username,
         "questions": []
@@ -547,13 +557,17 @@ def refresh_my_summary(request, form_id):
     
     return redirect('my_summary', form_id=form.id)
 
+
+
+
 @login_required
+# ...rest of your imports and function
+
 def performance_output(request, form_id, employee_id):
-    """Shared performance output page for both admins and employees"""
     form = get_object_or_404(EvaluationForm, id=form_id)
     employee = get_object_or_404(CustomUser, id=employee_id, role='employee')
-    
-    # Check permissions
+
+    # Check permissions as before...
     if request.user.role == 'admin':
         if form.created_by != request.user:
             messages.error(request, 'You can only view outputs for your own forms.')
@@ -562,55 +576,72 @@ def performance_output(request, form_id, employee_id):
         if request.user != employee:
             messages.error(request, 'You can only view your own performance output.')
             return redirect('employee_dashboard')
-        
         if request.user not in form.assigned_employees.all():
             messages.error(request, 'You are not assigned to this form.')
             return redirect('employee_dashboard')
-    
-    # Get all reviews for this employee and form
+
     reviews = PeerReview.objects.filter(reviewee=employee, form=form)
-    
-    # Calculate ML rating distribution
+
     rating_counts = {'Excellent': 0, 'Good': 0, 'Average': 0, 'Needs Improvement': 0}
+    category_breakdown = {}
     total_answers = 0
     total_score = 0
-    
+    score_map = {'Excellent': 5, 'Good': 4, 'Average': 3, 'Needs Improvement': 2}
+    allowed_ratings = list(rating_counts.keys())
+
     for review in reviews:
         try:
-            # FIXED: Use correct field name
-            answers = json.loads(review.review_data)
-            for answer_data in answers:
-                if 'ml_rating' in answer_data:
-                    rating = answer_data['ml_rating']
-                    if rating in rating_counts:
-                        rating_counts[rating] += 1
-                    total_answers += 1
-                    
-                    # Calculate score (Excellent=5, Good=4, Average=3, Needs Improvement=2)
-                    score_map = {'Excellent': 5, 'Good': 4, 'Average': 3, 'Needs Improvement': 2}
-                    total_score += score_map.get(rating, 0)
+            analysis = review.ml_analysis or {}
+            if isinstance(analysis, str):
+                analysis = json.loads(analysis)
+            for question_text, result in analysis.items():
+                if isinstance(result, dict):
+                    category = result.get('category', 'Unknown')
+                    # Attempt to extract the prediction as a string, after stripping and normalizing
+                    pred = str(result.get('prediction', '')).strip().title()
+                    # Normalize known issues ("Needs Improvement" may sometimes come in various cases)
+                    if pred.lower() == "needs improvement":
+                        pred = "Needs Improvement"
+                    elif pred.lower() == "excellent":
+                        pred = "Excellent"
+                    elif pred.lower() == "good":
+                        pred = "Good"
+                    elif pred.lower() == "average":
+                        pred = "Average"
+                    if category == "Out of Scope":
+                        continue
+                    if category not in category_breakdown:
+                        category_breakdown[category] = {'Excellent': 0, 'Good': 0, 'Average': 0, 'Needs Improvement': 0}
+                    if pred in rating_counts:
+                        rating_counts[pred] += 1
+                        category_breakdown[category][pred] += 1
+                        total_answers += 1
+                        total_score += score_map.get(pred, 0)
         except Exception as e:
-            print(f"Error processing review: {e}")
+            print(f"Error processing review (id={review.id}): {e}")
             continue
-    
-    # Calculate overall score
-    overall_score = (total_score / total_answers) if total_answers > 0 else 0
-    
-    # Get or create summary for Gemini conclusion
+
+    overall_score = (total_score / total_answers) if total_answers > 0 else 0.0
+
+    category_data = []
+    for category, ratings in category_breakdown.items():
+        for rating, count in ratings.items():
+            if count > 0:
+                category_data.append({'category': category, 'rating': rating, 'count': count})
+
+    # Prepare pie chart data (MUST be included! Add this if missing)
+    pie_labels = ["Excellent", "Good", "Average", "Needs Improvement"]
+    pie_values = [rating_counts[l] for l in pie_labels]
+
     try:
         summary = EmployeeSummary.objects.get(employee=employee, form=form)
         gemini_conclusion = summary.gemini_analysis
     except EmployeeSummary.DoesNotExist:
         gemini_conclusion = None
-    
-    # Prepare chart data
-    labels_pie = list(rating_counts.keys())
-    data_pie = list(rating_counts.values())
-    
-    # Mock growth data (replace with actual historical data)
+
     labels_line = ['Review 1', 'Review 2', 'Review 3', 'Review 4', 'Current']
     data_line = [3.0, 3.2, 3.5, 3.8, max(overall_score, 1.0)]
-    
+
     context = {
         'employee': employee,
         'form': form,
@@ -618,15 +649,19 @@ def performance_output(request, form_id, employee_id):
         'overall_score': overall_score,
         'total_answers': total_answers,
         'excellent_count': rating_counts['Excellent'],
-        'improvement_areas': rating_counts['Needs Improvement'],
-        'labels_pie': json.dumps(labels_pie),
-        'data_pie': json.dumps(data_pie),
+        'good_count': rating_counts['Good'],
+        'average_count': rating_counts['Average'],
+        'improvement_count': rating_counts['Needs Improvement'],
         'labels_line': json.dumps(labels_line),
         'data_line': json.dumps(data_line),
+        'category_data': json.dumps(category_data),
+        'pie_labels': json.dumps(pie_labels),
+        'pie_values': json.dumps(pie_values),
         'gemini_conclusion': gemini_conclusion,
     }
-    
+
     return render(request, 'evaluation/output.html', context)
+
 
 
 # Employee view (their own output)
@@ -634,3 +669,81 @@ def performance_output(request, form_id, employee_id):
 def my_output(request, form_id):
     """Employee viewing their own performance output"""
     return performance_output(request, form_id, request.user.id)
+
+
+CATEGORY_MAPPINGS = {
+    "Work Efficiency": {
+        "Highly Efficient": "Excellent",
+        "Moderately Efficient": "Good",
+        "Average Efficiency": "Average",
+        "Needs Improvement": "Needs Improvement",
+    },
+    "Problem Solving": {
+        "Exceptional Problem Solver": "Excellent",
+        "Good Problem Solver": "Good",
+        "Average Problem Solver": "Average",
+        "Struggles with Problem Solving": "Needs Improvement",
+    },
+    "Adaptability": {
+        "Highly Adaptable": "Excellent",
+        "Moderately Adaptable": "Good",
+        "Somewhat Adaptable": "Average",
+        "Resistant to Change": "Needs Improvement",
+    },
+    "Communication": {
+        "Excellent Communicator": "Excellent",
+        "Good Communicator": "Good",
+        "Average Communicator": "Average",
+        "Needs Improvement in Communication": "Needs Improvement",
+    },
+    "Innovation": {
+        "Highly Innovative": "Excellent",
+        "Moderately Innovative": "Good",
+        "Average Innovator": "Average",
+        "Limited Innovation": "Needs Improvement",
+    },
+    "Leadership": {
+        "Strong Leader": "Excellent",
+        "Good Leader": "Good",
+        "Moderate Leadership Skills": "Average",
+        "Struggles with Leadership": "Needs Improvement",
+    },
+    "Self-Motivation": {
+        "Highly Self-Motivated": "Excellent",
+        "Moderately Self-Motivated": "Good",
+        "Somewhat Self-Motivated": "Average",
+        "Low Self-Motivation": "Needs Improvement",
+    },
+    "Emotional Intelligence": {
+        "Highly Emotionally Intelligent": "Excellent",
+        "Moderate Emotional Intelligence": "Good",
+        "Somewhat Emotionally Intelligent": "Average",
+        "Low Emotional Intelligence": "Needs Improvement",
+    },
+    "Punctuality": {
+        "Always on time": "Excellent",
+        "Usually on time": "Good",
+        "Sometimes Late": "Average",
+        "Frequently Late": "Needs Improvement",
+    },
+}
+
+def evaluation_results(request, form_id):
+    form = get_object_or_404(EvaluationForm, id=form_id)
+    responses = EvaluationResponse.objects.filter(form=form)
+
+    # Initialize counts
+    summary = defaultdict(lambda: {"Excellent": 0, "Good": 0, "Average": 0, "Needs Improvement": 0})
+
+    # Process each employee's responses
+    for response in responses:
+        # ✅ use "responses" not "answers"
+        for category, answer in response.responses.items():
+            if category in CATEGORY_MAPPINGS and answer in CATEGORY_MAPPINGS[category]:
+                mapped_label = CATEGORY_MAPPINGS[category][answer]
+                summary[category][mapped_label] += 1
+
+    return render(request, "evaluation/output.html", {
+        "form": form,
+        "summary": dict(summary)  # Send summary dict to template (not required for charts above)
+    })

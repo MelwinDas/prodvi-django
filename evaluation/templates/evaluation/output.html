@@ -10,15 +10,15 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
             margin: 0; padding: 0; min-height: 100vh;
         }
         .container {
             max-width: 1200px;
-            margin: 40px auto 0 auto;
+            margin: 40px auto;
             background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 10px 32px rgba(84, 110, 122, 0.13);
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(30, 60, 90, 0.12);
             padding: 40px;
         }
         .header-main {
@@ -26,110 +26,121 @@
             margin-bottom: 25px;
         }
         .header-main h1 {
-            font-size: 2.3rem; color: #293461;
+            font-size: 2.4rem; 
+            color: #243b67;
             margin: 0 0 12px 0;
+        }
+        .header-main p {
+            color: #5f6c80;
+            font-size: 1rem;
         }
         .navigation {
             margin-bottom: 30px;
             display: flex;
             gap: 15px;
             align-items: center;
+            flex-wrap: wrap;
         }
         .back-link {
             display: inline-block;
-            color: #667eea;
+            color: #2563eb;
             text-decoration: none;
             font-weight: 500;
             padding: 10px 20px;
-            border: 2px solid #667eea;
+            border: 2px solid #2563eb;
             border-radius: 8px;
             transition: all 0.3s ease;
         }
         .back-link:hover {
-            background: #667eea;
+            background: #2563eb;
             color: white;
         }
         .role-badge {
-            background: #28a745;
+            background: #16a34a;
             color: white;
-            padding: 5px 15px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
         }
         .role-badge.admin {
-            background: #dc3545;
+            background: #dc2626;
         }
         .employee-info {
-            background: #e3f2fd;
-            border-left: 6px solid #2196f3;
+            background: #eef6ff;
+            border-left: 6px solid #2563eb;
             padding: 22px;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 30px;
+        }
+        .employee-info h3 {
+            margin-top: 0;
+            color: #1d4ed8;
         }
         .charts-area {
             display: flex;
             flex-wrap: wrap;
-            gap: 50px;
+            gap: 40px;
             justify-content: center;
             margin-top: 40px;
         }
         .chart-container {
-            flex: 1 1 390px;
-            min-width: 330px;
-            background: #f9fcfd;
-            border-radius: 12px;
-            padding: 32px 22px;
-            box-shadow: 0 6px 18px rgba(76, 110, 153, 0.11);
+            flex: 1 1 380px;
+            min-width: 320px;
+            background: #f9fbfd;
+            border-radius: 14px;
+            padding: 28px 20px;
+            box-shadow: 0 8px 20px rgba(36, 64, 106, 0.08);
         }
         .chart-title {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #34495e;
-            margin-bottom: 15px;
+            color: #334155;
+            margin-bottom: 18px;
             text-align: center;
         }
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            gap: 22px;
             margin: 30px 0;
         }
         .metric-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
+            background: #f8f9fb;
+            padding: 22px;
+            border-radius: 12px;
             text-align: center;
-            border-left: 4px solid #007bff;
+            border-left: 4px solid #2563eb;
+            box-shadow: 0 4px 12px rgba(36, 64, 106, 0.05);
         }
         .metric-value {
-            font-size: 2rem;
+            font-size: 2.1rem;
             font-weight: 600;
-            color: #007bff;
+            color: #2563eb;
         }
         .metric-label {
             font-size: 0.9rem;
-            color: #6c757d;
-            margin-top: 5px;
+            color: #6b7280;
+            margin-top: 6px;
         }
         .conclusion {
-            margin-top: 40px;
-            font-size: 1.1rem;
-            background: #e7f3ff;
+            margin-top: 50px;
+            font-size: 1.05rem;
+            background: #ebf5ff;
             padding: 25px;
-            border-left: 5px solid #2196f3;
-            border-radius: 8px;
-            color: #144d79;
+            border-left: 5px solid #1d4ed8;
+            border-radius: 10px;
+            color: #12345c;
             line-height: 1.6;
         }
         .conclusion h3 {
-            color: #2196f3;
+            color: #1d4ed8;
             margin-bottom: 15px;
         }
         @media (max-width: 980px) {
-            .charts-area { flex-direction: column; gap: 32px; }
+            .charts-area { flex-direction: column; gap: 28px; }
             .chart-container { width: 100%; min-width: unset; }
-            .navigation { flex-direction: column; align-items: flex-start; }
+            .navigation { flex-direction: column; align-items: flex-start; gap: 10px; }
         }
     </style>
 </head>
@@ -173,8 +184,8 @@
                 <div class="metric-label">Excellent Ratings</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">{{ improvement_areas }}</div>
-                <div class="metric-label">Areas for Improvement</div>
+                <div class="metric-value">{{ improvement_count }}</div>
+                <div class="metric-label">Needs Improvement Ratings</div>
             </div>
         </div>
 
@@ -182,6 +193,7 @@
             <div class="chart-container">
                 <div class="chart-title">ML Model Rating Distribution</div>
                 <canvas id="pieChart"></canvas>
+                <div id="pieChartFallback" style="text-align:center; color:#dc2626; font-weight:500; margin-top:12px; display:none;">No ratings available for pie chart.</div>
             </div>
             <div class="chart-container">
                 <div class="chart-title">Performance Growth Over Time</div>
@@ -192,62 +204,75 @@
         {% if gemini_conclusion %}
             <div class="conclusion">
                 <h3>🤖 AI Performance Analysis & Conclusion</h3>
-                <div>{{ gemini_conclusion|linebreaks }}</div>
+                <div>{{ gemini_conclusion|safe|linebreaks }}</div>
             </div>
         {% endif %}
     </div>
 
     <script>
-        // Pie Chart Data
-        const ratingLabels = {{ labels_pie|safe }};
-        const ratingData = {{ data_pie|safe }};
+        // Pie Chart Data (safe fallback if no data)
+        let pieLabels = [];
+        let pieValues = [];
+        try {
+            pieLabels = {{ pie_labels|safe }};
+            pieValues = {{ pie_values|safe }};
+        } catch(e) {}
 
-        const pieColors = ['#28a745', '#17a2b8', '#ffc107', '#dc3545'];
-
-        new Chart(document.getElementById('pieChart').getContext('2d'), {
-            type: 'pie',
-            data: {
-                labels: ratingLabels,
-                datasets: [{
-                    data: ratingData,
-                    backgroundColor: pieColors,
-                    borderWidth: 2,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { 
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        if (pieValues && pieValues.reduce((a, b) => a + b, 0) > 0) {
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieValues,
+                        backgroundColor: ['#16a34a', '#2563eb', '#fbbf24', '#dc2626'],
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { 
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        } else {
+            document.getElementById('pieChart').style.display = 'none';
+            document.getElementById('pieChartFallback').style.display = 'block';
+        }
 
-        // Line Chart Data
-        const growthLabels = {{ labels_line|safe }};
-        const growthData = {{ data_line|safe }};
+        // Line Chart Data (safe fallback if no data)
+        let growthLabels = [];
+        let growthData = [];
+        try {
+            growthLabels = {{ labels_line|safe }};
+            growthData = {{ data_line|safe }};
+        } catch(e){}
 
-        new Chart(document.getElementById('lineChart').getContext('2d'), {
+        const lineCtx = document.getElementById('lineChart').getContext('2d');
+        new Chart(lineCtx, {
             type: 'line',
             data: {
                 labels: growthLabels,
                 datasets: [{
                     label: 'Performance Score',
                     data: growthData,
-                    borderColor: '#2196f3',
-                    backgroundColor: 'rgba(33,150,243,0.1)',
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37,99,235,0.1)',
                     tension: 0.4,
                     fill: true,
-                    pointBackgroundColor: "#2196f3",
+                    pointBackgroundColor: "#2563eb",
                     pointBorderColor: "#fff",
                     pointBorderWidth: 2,
                     pointRadius: 6
@@ -260,19 +285,16 @@
                         min: 0, 
                         max: 5, 
                         title: { display: true, text: 'Performance Score' },
-                        grid: { color: 'rgba(0,0,0,0.1)' }
+                        grid: { color: 'rgba(0,0,0,0.05)' }
                     },
                     x: { 
                         title: { display: true, text: 'Review Period' },
-                        grid: { color: 'rgba(0,0,0,0.1)' }
+                        grid: { color: 'rgba(0,0,0,0.05)' }
                     }
                 },
                 plugins: { 
                     legend: { display: false },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    }
+                    tooltip: { mode: 'index', intersect: false }
                 },
                 interaction: {
                     mode: 'nearest',

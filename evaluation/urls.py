@@ -10,10 +10,13 @@ urlpatterns = [
     # Admin paths
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('create-form/', views.create_form, name='create_form'),
+    
     path('view-reviews/<int:form_id>/', views.view_reviews, name='view_reviews'),
     path('admin-summaries/<int:form_id>/', views.admin_summaries_list, name='admin_summaries_list'),
     path('admin-summary/<int:form_id>/<int:employee_id>/', views.admin_employee_summary, name='admin_employee_summary'),
     path('refresh-summary/<int:form_id>/<int:employee_id>/', views.refresh_employee_summary, name='refresh_employee_summary'),
+    path('evaluation/<int:form_id>/results/', views.evaluation_results, name="evaluation_results"),
+
     
     # Employee paths
     path('employee-dashboard/', views.employee_dashboard, name='employee_dashboard'),

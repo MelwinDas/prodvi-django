@@ -7,19 +7,12 @@
     <title>Create Peer Review Form - PRODVI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
         .form-container {
             max-width: 800px;
             margin: 0 auto;
@@ -28,151 +21,153 @@
             padding: 40px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 30px;
+        .form-header { text-align: center; margin-bottom: 30px; }
+        .back-link { color: #667eea; text-decoration: none; font-weight: 500; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 15px; border: 2px solid #e1e5e9;
+            border-radius: 10px; font-size: 1rem;
         }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .employee-selection {
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            padding: 15px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .employee-item {
+        .employee-selection { border: 2px solid #e1e5e9; border-radius: 10px; padding: 15px; }
+        .department { margin-bottom: 15px; }
+        .department-header {
+            background: #f5f5f5;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
+            justify-content: space-between;
+            transition: background 0.3s ease;
+        }
+        .department-header:hover {
+            background: #e9ecef;
+        }
+        .dept-checkbox { margin-right: 10px; }
+
+        /* Arrow animation */
+        .arrow {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        .arrow.rotate {
+            transform: rotate(90deg);
         }
 
-        .employee-item:last-child {
-            border-bottom: none;
+        /* Smooth slide animation */
+        .employee-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+        }
+        .employee-list.show {
+            max-height: 500px;
+            padding-top: 10px;
         }
 
+        .employee-item { margin: 5px 0; }
         .submit-btn {
-            width: 100%;
-            padding: 15px;
+            width: 100%; padding: 15px;
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .help-text {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .peer-info {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
+            color: white; border: none; border-radius: 10px;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <a href="{% url 'admin_dashboard' %}" class="back-link">← Back to Dashboard</a>
-        
-        <div class="form-header">
-            <h1>Create Peer Review Form</h1>
-            <p>Create a form for employees to review their colleagues</p>
-        </div>
-
-        <div class="peer-info">
-            <h4>How Peer Reviews Work:</h4>
-            <p>• Each assigned employee will review all other assigned employees</p>
-            <p>• If you assign 3 employees, each will review the other 2 colleagues</p>
-            <p>• ML analysis will be performed on all responses automatically</p>
-        </div>
-
-        <form method="post">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="title">Form Title</label>
-                <input type="text" name="title" id="title" required placeholder="e.g., Q1 Peer Performance Review">
-            </div>
-            
-            <div class="form-group">
-                <label for="description">Description (Optional)</label>
-                <textarea name="description" id="description" placeholder="Brief description of this peer review form..."></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="questions">Review Questions</label>
-                <textarea name="questions" id="questions" required placeholder="Enter each question on a new line:&#10;&#10;How would you rate their communication skills?&#10;How effectively do they collaborate with the team?&#10;What are their key strengths?&#10;What areas could they improve?"></textarea>
-                <div class="help-text">Enter each question on a separate line. These questions will be asked about each colleague.</div>
-            </div>
-            
-            <div class="form-group">
-                <label>Select Employees for Peer Review</label>
-                <div class="employee-selection">
-                    {% for employee in employees %}
-                        <div class="employee-item">
-                            <input type="checkbox" name="assigned_employees" value="{{ employee.id }}" id="emp_{{ employee.id }}">
-                            <label for="emp_{{ employee.id }}" style="margin-left: 10px; margin-bottom: 0;">
-                                <strong>{{ employee.username }}</strong>
-                                {% if employee.department %} - {{ employee.department }}{% endif %}
-                                {% if employee.email %} ({{ employee.email }}){% endif %}
-                            </label>
-                        </div>
-                    {% empty %}
-                        <p>No employees found. Create employee accounts first.</p>
-                    {% endfor %}
-                </div>
-                <div class="help-text">Select employees who will participate in peer review. Each will review all others selected.</div>
-            </div>
-            
-            <button type="submit" class="submit-btn">Create Peer Review Form</button>
-        </form>
+<div class="form-container">
+    <a href="{% url 'admin_dashboard' %}" class="back-link">← Back to Dashboard</a>
+    <div class="form-header">
+        <h1>Create Peer Review Form</h1>
+        <p>Create a form for employees to review their colleagues</p>
     </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="title">Form Title</label>
+            <input type="text" name="title" id="title" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Description (Optional)</label>
+            <textarea name="description" id="description"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="questions">Review Questions</label>
+            <textarea name="questions" id="questions" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Select Employees by Department</label>
+            <div class="employee-selection">
+                {% for dept, emp_list in departments.items %}
+                <div class="department">
+                    <div class="department-header" onclick="toggleDept('{{ forloop.counter }}')">
+                        <div>
+                            <input type="checkbox" class="dept-checkbox" id="dept_{{ forloop.counter }}"
+                                   onchange="toggleDepartment(this, '{{ forloop.counter }}')">
+                            <label for="dept_{{ forloop.counter }}"><strong>{{ dept }}</strong></label>
+                        </div>
+                        <span id="arrow_{{ forloop.counter }}" class="arrow">▶</span>
+                    </div>
+                    <div class="employee-list" id="dept_list_{{ forloop.counter }}">
+                        {% for emp in emp_list %}
+                        <div class="employee-item">
+                            <input type="checkbox" name="assigned_employees" value="{{ emp.id }}" 
+                                   id="emp_{{ emp.id }}" onchange="updateDeptCheckbox('{{ forloop.parentloop.counter }}')">
+                            <label for="emp_{{ emp.id }}">{{ emp.username }} ({{ emp.email }})</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% empty %}
+                    <p>No employees found.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Create Peer Review Form</button>
+    </form>
+</div>
+
+<script>
+function toggleDept(counter) {
+    const list = document.getElementById("dept_list_" + counter);
+    const arrow = document.getElementById("arrow_" + counter);
+
+    if (list.classList.contains("show")) {
+        list.classList.remove("show");
+        arrow.classList.remove("rotate");
+    } else {
+        list.classList.add("show");
+        arrow.classList.add("rotate");
+    }
+}
+
+function toggleDepartment(deptCheckbox, counter) {
+    const list = document.getElementById("dept_list_" + counter);
+    const checkboxes = list.querySelectorAll("input[type=checkbox]");
+    checkboxes.forEach(cb => cb.checked = deptCheckbox.checked);
+}
+
+function updateDeptCheckbox(counter) {
+    const list = document.getElementById("dept_list_" + counter);
+    const deptCheckbox = document.getElementById("dept_" + counter);
+    const checkboxes = list.querySelectorAll("input[type=checkbox]");
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    const noneChecked = Array.from(checkboxes).every(cb => !cb.checked);
+
+    if (allChecked) {
+        deptCheckbox.checked = true;
+        deptCheckbox.indeterminate = false;
+    } else if (noneChecked) {
+        deptCheckbox.checked = false;
+        deptCheckbox.indeterminate = false;
+    } else {
+        deptCheckbox.indeterminate = true;
+    }
+}
+</script>
 </body>
 </html>

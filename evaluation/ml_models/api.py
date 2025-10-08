@@ -4,7 +4,7 @@ import google.generativeai as genai
 from django.conf import settings
 
 class FileProcessor:
-    def __init__(self, model_name="gemini-1.5-flash"):
+    def __init__(self, model_name="gemini-2.5-flash"):
         # Get API key from environment or Django settings
         api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, 'GEMINI_API_KEY', None)
         if not api_key:

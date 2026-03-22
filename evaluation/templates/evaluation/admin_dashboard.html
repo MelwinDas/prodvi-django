@@ -1,217 +1,204 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - PRODVI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .stats {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-card {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .content-section {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            margin-right: 10px;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-        }
-
-        .btn-view {
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white;
-        }
-
-        .btn-summary {
-            background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .messages {
-            margin-bottom: 20px;
-        }
-
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .btn-group {
-            margin-top: 15px;
-        }
-    </style>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRODVI Admin Dashboard</title>
+<link rel="icon" type="image/png" href="{% static 'evaluation/images/favicon.png' %}">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode:"class",
+    theme:{ extend:{ colors:{
+      "primary":"#3952bc","secondary":"#72479e","tertiary":"#0058ba",
+      "surface":"#f5f6f7","surface-container-low":"#eff1f2",
+      "surface-container":"#e6e8ea","surface-container-lowest":"#ffffff",
+      "on-surface":"#2c2f30","on-surface-variant":"#595c5d",
+      "outline":"#757778","outline-variant":"#abadae",
+      "error":"#b41340","primary-container":"#859aff","secondary-container":"#e4c6ff"
+    }, fontFamily:{ body:["Inter"] } } }
+  }
+</script>
+<style>
+  body { font-family:'Inter',sans-serif; }
+  .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .glass-card { background:rgba(255,255,255,0.88); backdrop-filter:blur(16px); border:1px solid rgba(117,119,120,0.10); }
+  .brand-gradient { background:linear-gradient(135deg,#3952bc 0%,#72479e 100%); }
+  .sidebar-link { display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:0.875rem;font-size:0.875rem;font-weight:500;color:#595c5d;transition:all 0.2s; }
+  .sidebar-link:hover { background:#eff1f2;color:#3952bc;transform:translateX(2px); }
+  .sidebar-link.active { background:white;color:#3952bc;font-weight:700;box-shadow:0 2px 8px rgba(57,82,188,0.12); }
+  .stat-card { transition:transform 0.2s, box-shadow 0.2s; }
+  .stat-card:hover { transform:translateY(-4px); box-shadow:0 12px 30px rgba(57,82,188,0.12); }
+  .table-row { transition:background 0.15s; }
+  .table-row:hover { background:rgba(57,82,188,0.04); }
+</style>
 </head>
-<body>
-    <div class="dashboard-container">
-        <div class="header">
-            <h1>Admin Dashboard - Peer Reviews</h1>
-            <div>
-                <span>Welcome, <strong>{{ user.username }}</strong></span>
-                <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
-            </div>
-        </div>
+<body class="bg-surface text-on-surface selection:bg-primary-container">
 
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number">{{ forms_with_stats|length }}</div>
-                <div class="stat-label">Forms Created</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ total_reviews }}</div>
-                <div class="stat-label">Reviews Completed</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ pending_reviews }}</div>
-                <div class="stat-label">Reviews Pending</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ employees.count }}</div>
-                <div class="stat-label">Total Employees</div>
-            </div>
-        </div>
+{% if messages %}
+<div id="django-messages" class="hidden">
+  {% for message in messages %}<span data-type="{{ message.tags }}">{{ message }}</span>{% endfor %}
+</div>
+{% endif %}
 
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        <div class="content-section">
-            <div class="section-header">
-                <h2>Peer Review Forms</h2>
-                <a href="{% url 'create_form' %}" class="btn btn-primary">Create New Peer Review Form</a>
-            </div>
-
-            {% for item in forms_with_stats %}
-                <div class="form-card">
-                    <h3>{{ item.form.title }}</h3>
-                    <p><strong>Description:</strong> {{ item.form.description|default:"No description" }}</p>
-                    <p><strong>Questions:</strong> {{ item.form.questions|length }} questions</p>
-                    <p><strong>Assigned Employees:</strong> {{ item.form.assigned_employees.count }}</p>
-                    <p><strong>Expected Reviews:</strong> {{ item.expected_reviews }} total</p>
-                    <p><strong>Completed Reviews:</strong> {{ item.completed_reviews }}</p>
-                    <p><strong>Created:</strong> {{ item.form.created_at|date:"M d, Y at H:i" }}</p>
-                    
-                    <div class="btn-group">
-                        <a href="{% url 'view_reviews' item.form.id %}" class="btn btn-view">View Reviews & ML Analysis</a>
-                        <a href="{% url 'admin_summaries_list' item.form.id %}" class="btn btn-summary">Performance Summaries</a>
-                    </div>
-                </div>
-            {% empty %}
-                <p style="text-align: center; color: #666;">No peer review forms created yet. Create your first form!</p>
-            {% endfor %}
-        </div>
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-md shadow-sm flex justify-between items-center px-6 h-16 border-b border-slate-200/50">
+  <div class="flex items-center gap-8">
+    <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3">
+      <img alt="PRODVI Logo" class="h-9 w-auto object-contain" src="{% static 'evaluation/images/logo.png' %}"/>
+      <span class="text-xl font-black tracking-tight text-slate-900">PRODVI</span>
+    </a>
+    <div class="hidden md:flex items-center bg-surface-container px-4 py-2 rounded-full w-72 focus-within:ring-2 ring-primary/20 transition-all">
+      <span class="material-symbols-outlined text-on-surface-variant mr-2 text-[20px]">search</span>
+      <input id="table-search-input" class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-on-surface-variant outline-none" placeholder="Search forms…" type="text"/>
     </div>
-</body>
-</html>
+  </div>
+  <div class="flex items-center gap-4">
+    <button class="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-500 relative">
+      <span class="material-symbols-outlined">notifications</span>
+      <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+    </button>
+    <div class="h-8 w-px bg-slate-200 mx-1"></div>
+    <div class="flex items-center gap-3 cursor-pointer group">
+      <div class="text-right hidden sm:block">
+        <p class="text-xs font-bold text-on-surface">{{ request.user.username }}</p>
+        <p class="text-[10px] text-on-surface-variant">Administrator</p>
+      </div>
+      <img alt="Profile" class="h-9 w-9 rounded-full ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all" src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff"/>
+    </div>
+    <a href="{% url 'logout' %}" class="p-2 text-error/70 hover:text-error transition-colors" title="Logout">
+      <span class="material-symbols-outlined">logout</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-slate-50 border-r border-slate-200/50 flex flex-col py-8 px-4 gap-2 z-30 pt-20">
+  <p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-3 px-2 opacity-50">Main Menu</p>
+  <nav class="space-y-1">
+    <a class="sidebar-link active" href="{% url 'admin_dashboard' %}">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">dashboard</span> Dashboard
+    </a>
+    <a class="sidebar-link" href="{% url 'create_form' %}">
+      <span class="material-symbols-outlined">add_circle</span> Create Form
+    </a>
+  </nav>
+</aside>
+
+<!-- Main -->
+<main class="ml-64 pt-20 px-8 pb-12 min-h-screen">
+  <header class="flex justify-between items-end mb-8 mt-6">
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+      <p class="text-on-surface-variant mt-1">Welcome back, {{ request.user.username }}. Here's your overview.</p>
+    </div>
+    <a href="{% url 'create_form' %}" class="brand-gradient flex items-center gap-2 px-6 py-2.5 text-white rounded-full font-semibold text-sm shadow-lg shadow-primary/20 hover:scale-[1.03] hover:shadow-xl active:scale-[0.97] transition-all">
+      <span class="material-symbols-outlined text-lg">add_circle</span> Create New Form
+    </a>
+  </header>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="glass-card stat-card p-6 rounded-3xl flex items-start justify-between cursor-default">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant opacity-60 mb-1">Total Employees</p>
+        <h3 class="text-3xl font-extrabold" data-countup="{{ employees.count }}">{{ employees.count }}</h3>
+      </div>
+      <div class="bg-primary/10 p-3 rounded-full text-primary">
+        <span class="material-symbols-outlined">badge</span>
+      </div>
+    </div>
+    <div class="glass-card stat-card p-6 rounded-3xl flex items-start justify-between cursor-default">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant opacity-60 mb-1">Reviews Completed</p>
+        <h3 class="text-3xl font-extrabold" data-countup="{{ total_reviews }}">{{ total_reviews }}</h3>
+      </div>
+      <div class="bg-secondary/10 p-3 rounded-full text-secondary">
+        <span class="material-symbols-outlined">task_alt</span>
+      </div>
+    </div>
+    <div class="glass-card stat-card p-6 rounded-3xl flex items-start justify-between cursor-default">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant opacity-60 mb-1">Pending Reviews</p>
+        <h3 class="text-3xl font-extrabold" data-countup="{{ pending_reviews }}">{{ pending_reviews }}</h3>
+      </div>
+      <div class="bg-error/10 p-3 rounded-full text-error">
+        <span class="material-symbols-outlined">hourglass_empty</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forms Table -->
+  <div class="glass-card rounded-3xl overflow-hidden">
+    <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+      <h4 class="text-lg font-bold">Evaluation Forms</h4>
+      <span class="text-xs text-on-surface-variant">{{ forms_with_stats|length }} form{{ forms_with_stats|length|pluralize }}</span>
+    </div>
+    <div class="overflow-x-auto">
+      <table id="forms-table" class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-surface-container-low/30">
+            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Form Title</th>
+            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Assigned</th>
+            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Progress</th>
+            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Date</th>
+            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for item in forms_with_stats %}
+          <tr class="table-row group cursor-default">
+            <td class="px-6 py-4">
+              <span class="text-sm font-semibold">{{ item.form.title }}</span>
+            </td>
+            <td class="px-6 py-4 text-sm text-on-surface-variant">{{ item.form.assigned_employees.count }} Employees</td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="flex-grow h-1.5 bg-surface-container rounded-full overflow-hidden max-w-[100px]">
+                  <div class="h-full bg-primary rounded-full transition-all"
+                    style="width: {% if item.expected_reviews > 0 %}{% widthratio item.completed_reviews item.expected_reviews 100 %}%{% else %}0%{% endif %}">
+                  </div>
+                </div>
+                <span class="text-xs font-bold text-on-surface-variant">{{ item.completed_reviews }}/{{ item.expected_reviews }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-on-surface-variant">{{ item.form.created_at|date:"M d, Y" }}</td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-2">
+                <a href="{% url 'view_reviews' item.form.id %}" class="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-bold hover:bg-primary hover:text-white transition-all active:scale-95">
+                  View Reviews
+                </a>
+                <a href="{% url 'admin_summaries_list' item.form.id %}" class="px-3 py-1.5 bg-secondary/10 text-secondary rounded-lg text-xs font-bold hover:bg-secondary hover:text-white transition-all active:scale-95">
+                  Summaries
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="px-6 py-16 text-center">
+              <div class="flex flex-col items-center gap-3 text-on-surface-variant">
+                <span class="material-symbols-outlined text-5xl opacity-30">description</span>
+                <p class="text-sm font-medium">No evaluation forms yet.</p>
+                <a href="{% url 'create_form' %}" class="text-primary text-xs font-bold hover:underline">Create your first form →</a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script src="{% static 'evaluation/js/ui.js' %}"></script>
+<script>
+  document.querySelectorAll('#django-messages span').forEach(el => {
+    ProdviUI.toast.show(el.textContent, el.dataset.type.includes('error') ? 'error' : 'success');
+  });
+  ProdviUI.countUp.init('[data-countup]');
+  ProdviUI.tableSearch.init('table-search-input', 'forms-table');
+</script>
+</body></html>

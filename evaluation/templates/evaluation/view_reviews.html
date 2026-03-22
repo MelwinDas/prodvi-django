@@ -1,144 +1,138 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Review Results - {{ form.title }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .results-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .reviewee-section {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .review-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid #28a745;
-        }
-
-        .ml-analysis {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-
-        .ml-result {
-            margin-bottom: 10px;
-        }
-
-        .confidence-bar {
-            background: #e0e0e0;
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 5px 0;
-        }
-
-        .confidence-fill {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            height: 100%;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-    </style>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRODVI - View Reviews</title>
+<link rel="icon" type="image/png" href="{% static 'evaluation/images/favicon.png' %}">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config={darkMode:"class",theme:{extend:{colors:{
+    "primary":"#3952bc","secondary":"#72479e","tertiary":"#0058ba",
+    "surface":"#f5f6f7","surface-container-low":"#eff1f2","surface-container":"#e6e8ea","surface-container-lowest":"#ffffff",
+    "on-surface":"#2c2f30","on-surface-variant":"#595c5d","outline":"#757778","error":"#b41340","primary-container":"#859aff"
+  },fontFamily:{body:["Inter"]}}}}
+</script>
+<style>
+  body{font-family:'Inter',sans-serif;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  .glass-card{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);border:1px solid rgba(0,0,0,0.05);}
+  .sidebar-link{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:0.875rem;font-size:0.875rem;font-weight:500;color:#595c5d;transition:all 0.2s;}
+  .sidebar-link:hover{background:#eff1f2;color:#3952bc;transform:translateX(2px);}
+  .sidebar-link.active{background:white;color:#3952bc;font-weight:700;box-shadow:0 2px 8px rgba(57,82,188,0.12);}
+  .reviewee-group{border-radius:1.5rem;overflow:hidden;background:white;border:1px solid rgba(0,0,0,0.05);transition:box-shadow 0.2s;}
+  .reviewee-group:hover{box-shadow:0 6px 24px rgba(57,82,188,0.08);}
+  .review-detail{display:none;padding:1.25rem 1.5rem;border-top:1px solid rgba(0,0,0,0.05);background:rgba(243,244,246,0.5);}
+</style>
 </head>
-<body>
-    <div class="results-container">
-        <a href="{% url 'admin_dashboard' %}" class="back-link">← Back to Dashboard</a>
-        
-        <div class="header">
-            <h1>Review Results: {{ form.title }}</h1>
-            <p>Comprehensive peer review analysis with ML insights</p>
-        </div>
+<body class="bg-surface text-on-surface min-h-screen">
 
-        {% for reviewee_id, data in reviews_by_reviewee.items %}
-            <div class="reviewee-section">
-                <h2>Reviews for {{ data.reviewee.username }}</h2>
-                {% if data.reviewee.department %}
-                    <p style="color: #666; margin-bottom: 20px;">Department: {{ data.reviewee.department }}</p>
-                {% endif %}
-
-                {% for review in data.reviews %}
-                    <div class="review-card">
-                        <h4>Review by {{ review.reviewer.username }}</h4>
-                        <p style="color: #666; font-size: 0.9rem;">Submitted: {{ review.submitted_at|date:"M d, Y at H:i" }}</p>
-                        
-                        {% for question, answer in review.responses.items %}
-                            <div style="margin: 15px 0;">
-                                <strong>Q: {{ question }}</strong>
-                                <p style="margin: 8px 0;">{{ answer }}</p>
-                                
-                                {% if review.ml_analysis %}
-                                    {% for ml_question, analysis in review.ml_analysis.items %}
-                                        {% if ml_question == question %}
-                                            <div class="ml-analysis">
-                                                <strong>🤖 ML Analysis:</strong>
-                                                <div class="ml-result">
-                                                    <strong>Category:</strong> {{ analysis.category }}
-                                                </div>
-                                                <div class="ml-result">
-                                                    <strong>Confidence:</strong> {{ analysis.confidence|floatformat:2 }}%
-                                                    <div class="confidence-bar">
-                                                        <div class="confidence-fill" style="width: {{ analysis.confidence }}%"></div>
-                                                    </div>
-                                                </div>
-                                                <div class="ml-result">
-                                                    <strong>Prediction:</strong> {{ analysis.prediction }}
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-            </div>
-        {% empty %}
-            <div class="reviewee-section">
-                <p style="text-align: center; color: #666;">No reviews submitted yet for this form.</p>
-            </div>
-        {% endfor %}
+<!-- NavBar -->
+<nav class="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-md shadow-sm flex justify-between items-center px-6 h-16 border-b border-slate-200/50">
+  <div class="flex items-center gap-4">
+    <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3">
+      <img alt="PRODVI Logo" class="h-9 w-auto object-contain" src="{% static 'evaluation/images/logo.png' %}"/>
+      <span class="text-xl font-black tracking-tight text-slate-900">PRODVI</span>
+    </a>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="text-right hidden sm:block">
+      <p class="text-xs font-bold text-on-surface">{{ request.user.username }}</p>
+      <p class="text-[10px] text-on-surface-variant">Administrator</p>
     </div>
-</body>
-</html>
+    <img alt="Profile" class="h-9 w-9 rounded-full ring-2 ring-primary/10" src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff"/>
+    <a href="{% url 'logout' %}" class="p-2 text-error/70 hover:text-error transition-colors">
+      <span class="material-symbols-outlined">logout</span>
+    </a>
+  </div>
+</nav>
+
+<aside class="fixed left-0 top-0 h-full w-64 bg-slate-50 border-r border-slate-200/50 flex flex-col py-8 px-4 gap-2 z-30 pt-20">
+  <p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-3 px-2 opacity-50">Main Menu</p>
+  <nav class="space-y-1">
+    <a class="sidebar-link" href="{% url 'admin_dashboard' %}">
+      <span class="material-symbols-outlined">dashboard</span> Dashboard
+    </a>
+    <a class="sidebar-link active" href="#">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">rate_review</span> Reviews
+    </a>
+  </nav>
+</aside>
+
+<main class="ml-64 pt-20 px-8 pb-12 min-h-screen">
+  <div class="max-w-5xl mx-auto mt-6">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <a href="{% url 'admin_dashboard' %}" class="text-on-surface-variant hover:text-primary text-sm transition-colors">Dashboard</a>
+          <span class="material-symbols-outlined text-[14px] text-on-surface-variant">chevron_right</span>
+          <span class="text-sm font-semibold">Reviews</span>
+        </div>
+        <h1 class="text-3xl font-bold tracking-tight">{{ form.title }}</h1>
+        <p class="text-on-surface-variant mt-1">Review submissions by employee</p>
+      </div>
+      <a href="{% url 'admin_summaries_list' form.id %}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-secondary/10 text-secondary rounded-full text-sm font-bold hover:bg-secondary hover:text-white transition-all active:scale-95">
+        <span class="material-symbols-outlined text-[16px]">analytics</span> View Summaries
+      </a>
+    </div>
+
+    <div class="space-y-4">
+      {% for reviewee_id, data in reviews_by_reviewee.items %}
+      <div class="reviewee-group">
+        <!-- Reviewer header — click to expand -->
+        <div class="flex items-center justify-between p-5 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleReviews('reviews-{{ reviewee_id }}', this)">
+          <div class="flex items-center gap-4">
+            <div class="h-11 w-11 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-base flex-shrink-0">
+              {{ data.reviewee.username|slice:":1"|upper }}
+            </div>
+            <div>
+              <p class="font-bold text-on-surface">{{ data.reviewee.username }}</p>
+              <p class="text-xs text-on-surface-variant">{{ data.reviewee.department }} · {{ data.reviews|length }} review{{ data.reviews|length|pluralize }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">{{ data.reviews|length }} received</span>
+            <span class="material-symbols-outlined text-on-surface-variant collapse-icon">expand_more</span>
+          </div>
+        </div>
+        <!-- Reviewer list (collapsible) -->
+        <div id="reviews-{{ reviewee_id }}" class="review-detail">
+          <div class="space-y-2">
+            {% for review in data.reviews %}
+            <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-on-surface-variant font-bold text-xs">
+                  {{ review.reviewer.username|slice:":1"|upper }}
+                </div>
+                <p class="text-sm font-medium">{{ review.reviewer.username }}</p>
+              </div>
+              <span class="text-xs text-on-surface-variant">{{ review.submitted_at|date:"M d, Y" }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="glass-card rounded-3xl p-16 text-center">
+        <span class="material-symbols-outlined text-5xl text-on-surface-variant/30">rate_review</span>
+        <p class="text-on-surface-variant mt-3 font-medium">No reviews submitted yet for this form.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</main>
+
+<script src="{% static 'evaluation/js/ui.js' %}"></script>
+<script>
+  function toggleReviews(id, header) {
+    const el = document.getElementById(id);
+    const icon = header.querySelector('.collapse-icon');
+    if (!el) return;
+    const hidden = el.style.display === 'none' || el.style.display === '';
+    el.style.display = hidden ? 'block' : 'none';
+    if (icon) icon.textContent = hidden ? 'expand_less' : 'expand_more';
+  }
+</script>
+</body></html>

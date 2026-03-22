@@ -1,198 +1,200 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PRODVI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRODVI | Login</title>
+<link rel="icon" type="image/png" href="{% static 'evaluation/images/favicon.png' %}">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: { extend: { colors: {
+      "primary": "#3952bc", "secondary": "#72479e",
+      "surface": "#f5f6f7", "surface-container-low": "#eff1f2",
+      "surface-container": "#e6e8ea", "surface-container-lowest": "#ffffff",
+      "on-surface": "#2c2f30", "on-surface-variant": "#595c5d",
+      "outline": "#757778", "outline-variant": "#abadae",
+      "error": "#b41340", "primary-container": "#859aff", "secondary-container": "#e4c6ff"
+    }, fontFamily: { body: ["Inter"] } } }
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .glass-card { background: rgba(255,255,255,0.88); backdrop-filter: blur(24px); }
+  .brand-gradient { background: linear-gradient(135deg, #3952bc 0%, #72479e 100%); }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .login-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-header h1 {
-            color: #333;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .login-header p {
-            color: #666;
-            font-size: 1rem;
-        }
-
-        .messages {
-            margin-bottom: 20px;
-        }
-
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #fff;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .login-footer {
-            text-align: center;
-        }
-
-        .login-footer a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .login-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #667eea;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+  /* Input field — NO left padding reserved by default; icon sits outside */
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    background: #eff1f2;
+    border-radius: 0.875rem;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition: outline-color 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+  }
+  .input-wrap:focus-within {
+    outline-color: #3952bc;
+    box-shadow: 0 0 0 4px rgba(57,82,188,0.1);
+  }
+  .input-wrap.has-error { outline-color: #b41340; }
+  .input-wrap .input-icon {
+    flex-shrink: 0;
+    padding: 0 0 0 0.875rem;
+    color: #757778;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0.875rem 1rem;
+    color: #2c2f30;
+    font-size: 0.9375rem;
+    font-family: inherit;
+  }
+  .input-wrap input::placeholder { color: #abadae; }
+  .input-wrap .toggle-btn {
+    flex-shrink: 0;
+    padding: 0 0.875rem;
+    color: #757778;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.15s;
+  }
+  .input-wrap .toggle-btn:hover { color: #2c2f30; }
+</style>
+<script>
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+    } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+    }
+</script>
 </head>
-<body>
-    <div class="login-container">
-        <a href="{% url 'landing_page' %}" class="back-link">← Back to Home</a>
-        
-        <div class="login-header">
-            <h1>Welcome Back</h1>
-            <p>Sign in to your PRODVI account</p>
-        </div>
+<body class="bg-[#d6d6fb] dark:bg-slate-900 text-on-surface dark:text-slate-100 min-h-screen flex flex-col selection:bg-primary-container transition-colors duration-300">
 
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+<!-- Ambient blobs -->
+<div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[120px] pointer-events-none"></div>
+<div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/10 blur-[120px] pointer-events-none"></div>
 
-        <form method="post" action="{% url 'login' %}">
-            {% csrf_token %} 
-            {% if form.errors %}
-                <div class="alert alert-error">
-                {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                {% endfor %}
-                </div>
-            {% endif %}
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            
-            <button type="submit" class="login-btn">Sign In</button>
-        </form>
-        
-        <div class="login-footer">
-            <p>Don't have an account? <a href="{% url 'signup' %}">Sign up here</a></p>
-        </div>
+<main class="flex-grow flex items-center justify-center p-6 relative z-10">
+<div class="w-full max-w-md">
+
+  <!-- Logo -->
+  <div class="flex justify-center mb-8">
+    <a href="{% url 'landing_page' %}" class="flex flex-col items-center gap-0 group">
+      <img alt="PRODVI Logo" class="h-28 w-auto object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-300" src="{% static 'evaluation/images/logo.png' %}"/>
+      <span class="-mt-4 text-2xl font-black tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">PRODVI</span>
+    </a>
+  </div>
+
+  <!-- Card -->
+  <div class="glass-card rounded-[2rem] p-10 shadow-2xl shadow-indigo-900/10 border border-white/40">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-extrabold tracking-tight mb-1">Welcome Back</h1>
+      <p class="text-on-surface-variant text-sm">Sign in to your PRODVI account</p>
     </div>
-</body>
-</html>
+
+    <!-- Django Messages → toasts -->
+    {% if messages %}
+    <div id="django-messages" class="hidden">
+      {% for message in messages %}<span data-type="{{ message.tags }}">{{ message }}</span>{% endfor %}
+    </div>
+    {% endif %}
+
+    <form id="login-form" action="{% url 'login' %}" method="POST" class="space-y-5" novalidate>
+      {% csrf_token %}
+
+      <!-- Username -->
+      <div class="space-y-1">
+        <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider" for="username">Username</label>
+        <div class="input-wrap" id="username-wrap">
+          <span class="input-icon">
+            <span class="material-symbols-outlined text-[20px]">person</span>
+          </span>
+          <input id="username" name="username" placeholder="Your username" type="text" required autocomplete="username"
+            value="{{ submitted_username }}"/>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="space-y-1">
+        <div class="flex justify-between items-end px-0.5">
+          <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider" for="password">Password</label>
+          <a class="text-[11px] font-bold text-primary hover:text-secondary transition-colors" href="#">Forgot?</a>
+        </div>
+        <div class="input-wrap" id="password-wrap">
+          <span class="input-icon">
+            <span class="material-symbols-outlined text-[20px]">lock</span>
+          </span>
+          <input id="password" name="password" placeholder="••••••••" type="password" required autocomplete="current-password"/>
+          <button class="toggle-btn" type="button" data-toggle-password="password" aria-label="Toggle password visibility">
+            <span class="material-symbols-outlined text-[20px]">visibility</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="pt-2">
+        <button id="login-btn" class="w-full brand-gradient text-white font-bold py-4 rounded-[1rem] shadow-lg shadow-primary/30 hover:scale-[1.02] hover:shadow-xl active:scale-[0.97] transition-all duration-200 flex justify-center items-center gap-2 group" type="submit">
+          Sign In
+          <span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </button>
+      </div>
+    </form>
+
+    <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+      <p class="text-on-surface-variant text-sm">Don't have an account?
+        <a class="text-primary font-bold hover:underline ml-1" href="{% url 'signup' %}">Sign up here</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-6 text-center">
+    <a class="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-medium text-sm py-2 px-4 rounded-full hover:bg-surface-container" href="{% url 'landing_page' %}">
+      <span class="material-symbols-outlined text-[18px]">keyboard_backspace</span> Back to Home
+    </a>
+  </div>
+</div>
+</main>
+
+<footer class="py-6 border-t border-slate-100">
+  <div class="max-w-7xl mx-auto flex justify-between items-center px-8">
+    <p class="text-xs text-slate-400">© 2024 PRODVI Platform. All rights reserved.</p>
+    <div class="flex gap-6">
+      <a class="text-xs text-slate-400 hover:text-indigo-600 underline transition-colors" href="#">Privacy Policy</a>
+      <a class="text-xs text-slate-400 hover:text-indigo-600 underline transition-colors" href="#">Terms of Service</a>
+    </div>
+  </div>
+</footer>
+
+<script src="{% static 'evaluation/js/ui.js' %}"></script>
+<script>
+  // Fire Django messages as toasts
+  document.querySelectorAll('#django-messages span').forEach(el => {
+    const type = el.dataset.type.includes('error') ? 'error' : el.dataset.type.includes('success') ? 'success' : 'info';
+    ProdviUI.toast.show(el.textContent, type);
+  });
+
+  // Password toggle
+  ProdviUI.passwordToggle.init();
+
+  // Form validation + loading
+  const form = document.getElementById('login-form');
+  ProdviUI.validate.init(form);
+  ProdviUI.loading.attach(form);
+</script>
+</body></html>

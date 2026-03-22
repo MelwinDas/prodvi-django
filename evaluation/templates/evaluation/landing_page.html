@@ -1,294 +1,319 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRODVI - Redefining the Future of Work</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRODVI - Redefining the Future of Work</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "outline": "#757778",
+              "surface-dim": "#d1d5d7",
+              "inverse-on-surface": "#9b9d9e",
+              "on-tertiary-fixed": "#00173a",
+              "error-dim": "#a70138",
+              "tertiary-fixed-dim": "#71a2ff",
+              "outline-variant": "#abadae",
+              "on-tertiary-fixed-variant": "#003779",
+              "on-secondary-fixed": "#481c73",
+              "secondary-dim": "#653b91",
+              "on-error": "#ffefef",
+              "on-primary-container": "#001867",
+              "on-primary-fixed": "#000000",
+              "on-secondary-fixed-variant": "#663c92",
+              "tertiary-fixed": "#89b0ff",
+              "primary-dim": "#2b45af",
+              "on-tertiary-container": "#002f69",
+              "error-container": "#f74b6d",
+              "surface-container-lowest": "#ffffff",
+              "primary-container": "#859aff",
+              "on-error-container": "#510017",
+              "inverse-primary": "#7991ff",
+              "surface": "#f5f6f7",
+              "primary-fixed": "#859aff",
+              "tertiary-dim": "#004da4",
+              "background": "#f5f6f7",
+              "surface-container": "#e6e8ea",
+              "on-surface-variant": "#595c5d",
+              "primary": "#3952bc",
+              "on-secondary-container": "#5d3288",
+              "secondary-fixed": "#e4c6ff",
+              "secondary-container": "#e4c6ff",
+              "secondary": "#72479e",
+              "on-tertiary": "#f0f2ff",
+              "surface-tint": "#3952bc",
+              "surface-bright": "#f5f6f7",
+              "inverse-surface": "#0c0f10",
+              "on-background": "#2c2f30",
+              "surface-variant": "#dadddf",
+              "secondary-fixed-dim": "#dab4ff",
+              "tertiary": "#0058ba",
+              "on-primary": "#f2f1ff",
+              "surface-container-high": "#e0e3e4",
+              "error": "#b41340",
+              "surface-container-low": "#eff1f2",
+              "primary-fixed-dim": "#748cf9",
+              "on-primary-fixed-variant": "#00207e",
+              "tertiary-container": "#89b0ff",
+              "on-secondary": "#fbefff",
+              "on-surface": "#2c2f30",
+              "surface-container-highest": "#dadddf"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
         }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            overflow-x: hidden;
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
         }
-
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-            position: relative;
-            padding: 0 20px;
+        .brand-gradient {
+            background: linear-gradient(135deg, #3952bc 0%, #72479e 100%);
         }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.1);
+        .ghost-border {
+            outline: 1px solid rgba(117, 119, 120, 0.12);
         }
-
-        .hero-content {
-            max-width: 900px;
-            z-index: 2;
-            position: relative;
-        }
-
-        .hero h1 {
-            font-size: 4rem;
-            font-weight: 800;
-            margin-bottom: 30px;
-            line-height: 1.2;
-            background: linear-gradient(45deg, #fff, #f8f9fa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero .subtitle {
-            font-size: 1.8rem;
-            font-weight: 400;
-            margin-bottom: 20px;
-            opacity: 0.95;
-        }
-
-        .hero .description {
-            font-size: 1.4rem;
-            font-weight: 300;
-            margin-bottom: 50px;
-            opacity: 0.9;
-        }
-
-        /* Buttons */
-        .cta-container {
-            display: flex;
-            gap: 25px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 40px;
-        }
-
-        .btn {
-            padding: 18px 45px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.4s ease;
-            display: inline-block;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary {
-            background: rgba(255, 255, 255, 1);
-            color: #764ba2;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-primary:hover {
-            background: #f8f9fa;
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: white;
-            transform: translateY(-3px);
-        }
-
-        /* Features Section */
-        .features {
-            padding: 100px 20px;
-            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-        }
-
-        .features-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .features h2 {
-            text-align: center;
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 60px;
-            color: #333;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 40px;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 25px;
-            display: block;
-        }
-
-        .feature-card h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .feature-card p {
-            font-size: 1rem;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        /* Navigation */
-        .nav {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            z-index: 10;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 20px;
-        }
-
-        .nav-link {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            padding: 10px 20px;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
-            .hero .subtitle {
-                font-size: 1.3rem;
-            }
-            
-            .hero .description {
-                font-size: 1.1rem;
-            }
-            
-            .cta-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn {
-                width: 100%;
-                max-width: 300px;
-            }
-
-            .features h2 {
-                font-size: 2rem;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .nav {
-                position: relative;
-                top: auto;
-                right: auto;
-                text-align: center;
-                margin-bottom: 20px;
-            }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
     </style>
+<link rel="icon" type="image/png" href="{% static 'evaluation/images/favicon.png' %}">
+<script>
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+    } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+    }
+</script>
 </head>
-<body>
-    <section class="hero">
-        <div class="nav">
-            <div class="nav-links">
-                <a href="{% url 'login' %}" class="nav-link">Login</a>
-                <a href="{% url 'signup' %}" class="nav-link">Sign Up</a>
+<body class="bg-[#d6d6fb] dark:bg-slate-900 text-on-surface dark:text-slate-100 font-body selection:bg-primary-container selection:text-on-primary-container transition-colors duration-300">
+<!-- TopNavBar: Shared Component Execution -->
+<nav class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm shadow-indigo-500/5 docked full-width top-0 sticky z-50 w-full px-6 py-3">
+<div class="max-w-7xl mx-auto flex justify-between items-center relative">
+<div class="flex items-center gap-0">
+<img alt="PRODVI Logo" class="h-20 w-auto" src="{% static 'evaluation/images/logo.png' %}"/>
+<span class="-ml-6 text-2xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent font-sans tracking-tight">PRODVI</span>
+</div>
+<div class="hidden md:flex items-center space-x-8 font-sans text-sm font-medium tracking-tight absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+<a class="text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 transition-colors" href="{% url 'landing_page' %}">Home</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors" href="{% url 'login' %}">Login</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors" href="{% url 'signup' %}">Sign Up</a>
+</div>
+<div class="flex items-center space-x-4">
+<button id="theme-toggle" class="p-2 text-slate-500 dark:text-slate-400 hover:text-indigo-500 transition-colors">
+<span class="material-symbols-outlined" id="theme-icon" data-icon="dark_mode">dark_mode</span>
+</button>
+<a href="{% url 'login' %}" class="brand-gradient text-on-primary px-6 py-2 rounded-xl font-semibold shadow-lg hover:scale-105 transition-all text-sm">
+    Log In
+</a>
+</div>
+</div>
+</nav>
+<main class="relative overflow-hidden">
+<!-- Ambient Glow Elements -->
+<div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[100px] pointer-events-none"></div>
+<!-- Hero Section -->
+<section class="relative pt-24 pb-32 px-6">
+<div class="max-w-7xl mx-auto text-center">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary-fixed/30 text-secondary font-label text-xs font-semibold tracking-widest mb-8 border border-secondary/10">
+<span class="material-symbols-outlined text-sm" data-icon="rocket_launch">rocket_launch</span>
+                    NEXT-GEN HR TECH
+                </div>
+<h1 class="text-6xl md:text-8xl font-black text-on-surface tracking-tighter mb-8 leading-[0.9]">
+                    Redefining the <br/>
+<span class="bg-gradient-to-r from-primary via-secondary to-primary-dim bg-clip-text text-transparent">future of work.</span>
+</h1>
+<p class="max-w-2xl mx-auto text-on-surface-variant text-lg md:text-xl font-body font-medium leading-relaxed mb-12">
+                    Building a collaborative and efficient work environment. <br class="hidden md:block"/>
+                    Streamlining HR processes with cutting-edge technology.
+                </p>
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+<a href="{% url 'signup' %}" class="brand-gradient text-on-primary px-8 py-4 rounded-xl font-semibold shadow-2xl shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
+                        Get Started Now
+                    </a>
+<button class="bg-surface-container-lowest text-primary ghost-border px-8 py-4 rounded-xl font-semibold flex items-center gap-2 hover:bg-surface-container-low transition-colors">
+                        View Demo <span class="material-symbols-outlined text-base" data-icon="play_circle">play_circle</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Bento Feature Grid -->
+<section class="px-6 py-20 max-w-7xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Smart Evaluation Card -->
+<div class="md:col-span-8 bg-surface-container-lowest/80 backdrop-blur-md p-8 rounded-3xl border border-outline/5 shadow-sm hover:shadow-indigo-900/5 transition-all group overflow-hidden relative">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+<div class="relative z-10 flex flex-col h-full">
+<div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+</div>
+<h3 class="text-3xl font-bold text-on-surface mb-4">Smart Evaluation</h3>
+<p class="text-on-surface-variant body-md max-w-md mb-8">
+                            AI-driven assessment engine that removes bias and identifies high-potential talent through multi-dimensional behavioral analysis.
+                        </p>
+<div class="mt-auto flex items-center gap-4">
+<div class="flex -space-x-3">
+<div class="w-10 h-10 rounded-full border-2 border-white bg-slate-200"></div>
+<div class="w-10 h-10 rounded-full border-2 border-white bg-slate-300"></div>
+<div class="w-10 h-10 rounded-full border-2 border-white bg-indigo-200"></div>
+</div>
+<span class="text-xs font-semibold text-primary-dim tracking-wider uppercase">+240 Active Users</span>
+</div>
+</div>
+</div>
+<!-- Advanced Analytics Card -->
+<div class="md:col-span-4 bg-gradient-to-br from-indigo-900 to-indigo-950 p-8 rounded-3xl text-white shadow-2xl relative overflow-hidden group">
+<div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.4),transparent)]"></div>
+<div class="relative z-10">
+<div class="w-12 h-12 rounded-xl bg-white/10 text-white flex items-center justify-center mb-6">
+<span class="material-symbols-outlined" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</div>
+<h3 class="text-2xl font-bold mb-4">Advanced Analytics</h3>
+<p class="text-indigo-100/70 text-sm leading-relaxed mb-6">
+                            Real-time insights into team performance, engagement levels, and retention risk prediction models.
+                        </p>
+<div class="space-y-3">
+<div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full w-4/5 bg-secondary-fixed-dim rounded-full"></div>
+</div>
+<div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full w-3/5 bg-primary-fixed rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Team Collaboration Card -->
+<div class="md:col-span-5 bg-surface-container-low/50 p-8 rounded-3xl border border-outline/5 hover:bg-surface-container-lowest transition-colors flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mb-6">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+</div>
+<h3 class="text-2xl font-bold text-on-surface mb-3">Team Collaboration</h3>
+<p class="text-on-surface-variant text-sm">
+                            Synchronize efforts across departments with unified goal tracking and instant feedback loops.
+                        </p>
+</div>
+<div class="mt-8 flex items-center text-primary font-semibold text-sm cursor-pointer group">
+                        Explore Collaboration <span class="material-symbols-outlined ml-2 group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+<!-- Visual Detail Card -->
+<div class="md:col-span-7 bg-surface p-2 rounded-3xl border border-outline/5 overflow-hidden">
+<div class="bg-surface-container-lowest rounded-3xl h-full flex flex-col items-center justify-center p-8 text-center border border-white/40 shadow-inner">
+<span class="material-symbols-outlined text-indigo-200 text-7xl mb-4" data-icon="hub">hub</span>
+<h4 class="text-on-surface-variant font-medium">Unified Platform Ecosystem</h4>
+<p class="text-xs text-slate-400 mt-2">Connect over 50+ enterprise HR tools seamlessly.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Dynamic Statistics -->
+<section class="py-24 relative">
+<div class="max-w-7xl mx-auto px-6">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+<div class="text-center">
+<div class="text-5xl font-black text-primary mb-2">98%</div>
+<div class="text-on-surface-variant font-label text-xs uppercase tracking-[0.2em]">Efficiency gain</div>
+</div>
+<div class="text-center">
+<div class="text-5xl font-black text-secondary mb-2">15k+</div>
+<div class="text-on-surface-variant font-label text-xs uppercase tracking-[0.2em]">Active Teams</div>
+</div>
+<div class="text-center">
+<div class="text-5xl font-black text-tertiary mb-2">0.2s</div>
+<div class="text-on-surface-variant font-label text-xs uppercase tracking-[0.2em]">Sync Latency</div>
+</div>
+<div class="text-center">
+<div class="text-5xl font-black text-on-surface mb-2">24/7</div>
+<div class="text-on-surface-variant font-label text-xs uppercase tracking-[0.2em]">Expert Support</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="max-w-7xl mx-auto px-6 mb-24">
+<div class="brand-gradient rounded-3xl p-12 md:p-20 text-center text-on-primary relative overflow-hidden">
+<div class="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<path d="M0 0 L100 0 L100 100 Z" fill="white"></path>
+</svg>
+</div>
+<h2 class="text-4xl md:text-5xl font-black mb-8 leading-tight max-w-3xl mx-auto">Ready to transform your organizational culture?</h2>
+<div class="flex flex-col sm:flex-row gap-4 justify-center">
+<a href="{% url 'signup' %}" class="bg-white text-indigo-900 px-10 py-4 rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all">Start Your Free Trial</a>
+<button class="bg-transparent border border-white/30 hover:bg-white/10 text-white px-10 py-4 rounded-xl font-bold transition-all">Schedule a Call</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer: Shared Component Execution -->
+<footer class="bg-transparent w-full py-8 mt-12 border-t border-slate-100 dark:border-slate-800/30">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center px-8 space-y-4 md:space-y-0">
+<div class="text-xs font-normal text-slate-400 dark:text-slate-500">
+                © 2024 PRODVI Platform. All rights reserved.
             </div>
-        </div>
+<div class="flex space-x-8">
+<a class="text-xs font-normal text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 underline transition-colors" href="#">System Status</a>
+<a class="text-xs font-normal text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 underline transition-colors" href="#">Privacy Policy</a>
+<a class="text-xs font-normal text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 underline transition-colors" href="#">Terms of Service</a>
+</div>
+</div>
+</footer>
+<script>
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    
+    if (themeIcon) {
+        if (document.documentElement.classList.contains('dark')) {
+            themeIcon.textContent = 'light_mode';
+            themeIcon.setAttribute('data-icon', 'light_mode');
+        } else {
+            themeIcon.textContent = 'dark_mode';
+            themeIcon.setAttribute('data-icon', 'dark_mode');
+        }
+    }
 
-        <div class="hero-content">
-            <h1>Redefining the future of work.</h1>
-            <p class="subtitle">Building a collaborative and efficient work environment.</p>
-            <p class="description">Streamlining HR processes with cutting-edge technology.</p>
-            
-            <div class="cta-container">
-                <a href="{% url 'login' %}" class="btn btn-primary">Get Started</a>
-                <a href="{% url 'signup' %}" class="btn btn-secondary">Join Today</a>
-            </div>
-        </div>
-    </section>
-
-    <section class="features">
-        <div class="features-container">
-            <h2>Why Choose PRODVI?</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <span class="feature-icon">🚀</span>
-                    <h3>Smart Evaluation</h3>
-                    <p>AI-powered employee evaluation system that provides accurate insights and recommendations for better team performance.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <span class="feature-icon">📊</span>
-                    <h3>Advanced Analytics</h3>
-                    <p>Comprehensive analytics and reporting dashboard for data-driven decision making and performance tracking.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <span class="feature-icon">🤝</span>
-                    <h3>Team Collaboration</h3>
-                    <p>Foster better teamwork and communication with our collaborative evaluation and feedback tools.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-</body>
-</html>
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+                localStorage.setItem('theme', 'light');
+                if (themeIcon) {
+                   themeIcon.textContent = 'dark_mode';
+                   themeIcon.setAttribute('data-icon', 'dark_mode');
+                }
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                localStorage.setItem('theme', 'dark');
+                if (themeIcon) {
+                   themeIcon.textContent = 'light_mode';
+                   themeIcon.setAttribute('data-icon', 'light_mode');
+                }
+            }
+        });
+    }
+</script>
+</body></html>

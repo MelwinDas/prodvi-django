@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRODVI | {{ form.title }}</title>
+<link rel="icon" type="image/png" href="{% static 'evaluation/images/favicon.png' %}">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config={darkMode:"class",theme:{extend:{colors:{
+    "primary":"#3952bc","secondary":"#72479e","tertiary":"#0058ba",
+    "surface":"#f5f6f7","surface-container-low":"#eff1f2","surface-container":"#e6e8ea","surface-container-lowest":"#ffffff",
+    "on-surface":"#2c2f30","on-surface-variant":"#595c5d","outline":"#757778","error":"#b41340","primary-container":"#859aff"
+  },fontFamily:{body:["Inter"]}}}}
+</script>
+<style>
+  body{font-family:'Inter',sans-serif;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  .glass-card{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);border:1px solid rgba(117,119,120,0.08);}
+  .brand-gradient{background:linear-gradient(135deg,#3952bc 0%,#72479e 100%);}
+  input[type=range]{appearance:none;height:8px;border-radius:999px;outline:none;cursor:pointer;background:linear-gradient(to right,#3952bc var(--val,60%),#e0e3e4 var(--val,60%));}
+  input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;border-radius:50%;background:#3952bc;border:3px solid white;box-shadow:0 2px 8px rgba(57,82,188,0.4);cursor:pointer;transition:transform 0.15s;}
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+  .input-field{width:100%;background:#eff1f2;border:none;outline:2px solid transparent;border-radius:0.875rem;padding:0.875rem 1rem;color:#2c2f30;font-size:0.9375rem;transition:outline-color 0.2s,box-shadow 0.2s;resize:vertical;}
+  .input-field:focus{outline-color:#3952bc;box-shadow:0 0 0 4px rgba(57,82,188,0.1);}
+</style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm flex justify-between items-center px-8 h-16 border-b border-slate-200/50">
+  <div class="flex items-center gap-3">
+    <a href="{% url 'employee_dashboard' %}" class="flex items-center gap-3">
+      <img alt="PRODVI Logo" class="h-9 w-auto object-contain" src="{% static 'evaluation/images/logo.png' %}"/>
+      <span class="text-xl font-black tracking-tight text-slate-900">PRODVI</span>
+    </a>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="text-right hidden sm:block">
+      <p class="text-xs font-bold text-on-surface">{{ request.user.username }}</p>
+      <p class="text-[10px] text-on-surface-variant">Employee</p>
+    </div>
+    <img alt="Avatar" class="h-9 w-9 rounded-full ring-2 ring-primary/10" src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff"/>
+    <a href="{% url 'logout' %}" class="p-2 text-error/70 hover:text-error transition-colors">
+      <span class="material-symbols-outlined">logout</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Sticky Progress Bar (top) -->
+<div id="progress-bar-container" class="fixed top-16 left-0 w-full z-40 bg-white/90 backdrop-blur-sm border-b border-slate-100 px-8 py-2">
+  <div class="max-w-4xl mx-auto flex items-center gap-4">
+    <span class="text-xs font-bold text-on-surface-variant">Progress</span>
+    <div class="flex-grow h-1.5 bg-surface-container rounded-full overflow-hidden">
+      <div id="progress-fill" class="h-full brand-gradient rounded-full transition-all duration-500" style="width:0%"></div>
+    </div>
+    <span id="progress-label" class="text-xs font-bold text-primary">0 / {{ questions|length }}</span>
+  </div>
+</div>
+
+<main class="relative z-10 pt-32 pb-36 px-4 md:px-8 max-w-4xl mx-auto min-h-screen">
+  <header class="mb-10">
+    <div class="flex items-center gap-2 mb-2 text-sm text-on-surface-variant">
+      <a href="{% url 'employee_dashboard' %}" class="hover:text-primary transition-colors">Dashboard</a>
+      <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+      <span class="font-semibold text-on-surface">Self Evaluation</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">{{ form.title }}</h1>
+    <p class="text-on-surface-variant max-w-lg">Reflect honestly on your performance. Your answers are private and help you grow.</p>
+  </header>
+
+  <form id="eval-form" method="POST" class="space-y-6" novalidate>
+    {% csrf_token %}
+
+    {% for question in questions %}
+    <article class="glass-card rounded-[1.75rem] p-7 shadow-sm question-card transition-all hover:-translate-y-0.5 hover:shadow-md" data-answered="false">
+      <div class="flex items-start gap-4 mb-5">
+        <span class="w-8 h-8 rounded-lg brand-gradient text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow">{{ forloop.counter }}</span>
+        <h2 class="text-base font-bold text-on-surface leading-snug">{{ question.text }}</h2>
+      </div>
+
+      <!-- Rating slider -->
+      <div class="mb-5">
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Rating</label>
+          <div class="flex items-center gap-2">
+            <span id="rating-label-{{ forloop.counter }}" class="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Average</span>
+            <span id="rating-val-{{ forloop.counter }}" class="w-7 h-7 rounded-full brand-gradient text-white flex items-center justify-center font-bold text-sm shadow">3</span>
+          </div>
+        </div>
+        <input type="range" name="ratings_{{ question.id }}" min="1" max="5" value="3" class="w-full"
+          data-index="{{ forloop.counter }}"
+          oninput="updateSlider(this, {{ forloop.counter }})"/>
+        <div class="flex justify-between text-[10px] text-on-surface-variant mt-1 px-0.5">
+          <span>Poor</span><span>Below Avg</span><span>Average</span><span>Good</span><span>Excellent</span>
+        </div>
+      </div>
+
+      <!-- Text area -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Self Assessment</label>
+          <span class="char-counter text-[11px] text-on-surface-variant">0 chars</span>
+        </div>
+        <textarea name="answers_{{ question.id }}" required
+          class="input-field" rows="4"
+          placeholder="Explain your achievements and challenges in this area…"
+          oninput="updateProgress(this)"></textarea>
+      </div>
+    </article>
+    {% endfor %}
+
+    <!-- Fixed bottom actions -->
+    <div class="fixed bottom-0 left-0 w-full z-40 bg-white/90 backdrop-blur-2xl px-6 py-4 border-t border-slate-100">
+      <div class="max-w-4xl mx-auto flex items-center justify-between">
+        <a href="{% url 'employee_dashboard' %}" class="text-on-surface-variant font-bold text-sm px-4 py-2 hover:bg-surface-container rounded-xl transition-all">
+          Cancel
+        </a>
+        <button type="submit" id="submit-btn" class="brand-gradient text-white font-bold text-sm px-10 py-3 rounded-full shadow-lg shadow-primary/25 hover:scale-[1.02] hover:shadow-xl active:scale-[0.97] transition-all flex items-center gap-2">
+          Submit Evaluation <span class="material-symbols-outlined text-[18px]">send</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</main>
+
+<script src="{% static 'evaluation/js/ui.js' %}"></script>
+<script>
+  const ratingLabels = {1:'Poor',2:'Below Avg',3:'Average',4:'Good',5:'Excellent'};
+  const ratingColors = {1:'#b41340',2:'#f59e0b',3:'#6366f1',4:'#3b82f6',5:'#10b981'};
+  const totalQuestions = {{ questions|length }};
+  let answeredSet = new Set();
+
+  function updateSlider(input, idx) {
+    const v = parseInt(input.value);
+    const pct = ((v - 1) / 4) * 100;
+    input.style.setProperty('--val', pct + '%');
+    document.getElementById('rating-val-' + idx).textContent = v;
+    const lbl = document.getElementById('rating-label-' + idx);
+    lbl.textContent = ratingLabels[v];
+    lbl.style.color = ratingColors[v];
+    lbl.style.background = ratingColors[v] + '18';
+  }
+
+  function updateProgress(textarea) {
+    const counter = textarea.closest('article').querySelector('.char-counter');
+    if (counter) counter.textContent = textarea.value.length + ' chars';
+    // Track answered
+    const article = textarea.closest('article');
+    const idx = [...document.querySelectorAll('.question-card')].indexOf(article);
+    if (textarea.value.trim().length > 0) answeredSet.add(idx);
+    else answeredSet.delete(idx);
+    const pct = (answeredSet.size / totalQuestions) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = answeredSet.size + ' / ' + totalQuestions;
+  }
+
+  // Init sliders
+  document.querySelectorAll('input[type=range]').forEach(s => updateSlider(s, s.dataset.index));
+
+  ProdviUI.loading.attach(document.getElementById('eval-form'));
+</script>
+</body></html>

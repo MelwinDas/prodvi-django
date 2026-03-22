@@ -1,207 +1,259 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - PRODVI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sign Up | PRODVI</title>
+<link rel="icon" type="image/png" href="{% static 'evaluation/images/favicon.png' %}">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode:"class",
+    theme: { extend: { colors: {
+      "primary":"#3952bc","secondary":"#72479e",
+      "surface":"#f5f6f7","surface-container-low":"#eff1f2",
+      "surface-container":"#e6e8ea","surface-container-lowest":"#ffffff",
+      "on-surface":"#2c2f30","on-surface-variant":"#595c5d",
+      "outline":"#757778","outline-variant":"#abadae",
+      "error":"#b41340","primary-container":"#859aff","secondary-container":"#e4c6ff",
+      "tertiary":"#0058ba"
+    }, fontFamily:{ body:["Inter"] } } }
+  }
+</script>
+<style>
+  body { font-family:'Inter',sans-serif; }
+  .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .glass-panel { background:rgba(255,255,255,0.88); backdrop-filter:blur(24px); }
+  .brand-gradient { background:linear-gradient(135deg,#3952bc 0%,#72479e 100%); }
+  .input-field {
+    width:100%; background:#eff1f2; border:none;
+    outline:2px solid transparent; outline-offset:2px;
+    border-radius:0.875rem; padding:0.8rem 1rem;
+    color:#2c2f30; font-size:0.9375rem;
+    transition:outline-color 0.2s, box-shadow 0.2s;
+  }
+  .input-field:focus { outline-color:#3952bc; box-shadow:0 0 0 4px rgba(57,82,188,0.1); }
+  .input-field.has-error { outline-color:#b41340; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .signup-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .signup-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .signup-header h1 {
-            color: #333;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .signup-header p {
-            color: #666;
-            font-size: 1rem;
-        }
-
-        .messages {
-            margin-bottom: 20px;
-        }
-
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #fff;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .signup-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-        }
-
-        .signup-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .signup-footer {
-            text-align: center;
-        }
-
-        .signup-footer a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .signup-footer a:hover {
-            text-decoration: underline;
-        }
-    </style>
+  /* Password wrap — flex row keeps eye button anchored to middle */
+  .pw-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #eff1f2;
+    border-radius: 0.875rem;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition: outline-color 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+  }
+  .pw-wrap:focus-within { outline-color: #3952bc; box-shadow: 0 0 0 4px rgba(57,82,188,0.1); }
+  .pw-wrap input {
+    flex: 1; background: transparent; border: none; outline: none;
+    padding: 0.8rem 0.75rem 0.8rem 1rem;
+    color: #2c2f30; font-size: 0.9375rem; font-family: inherit;
+    min-width: 0;
+  }
+  .pw-wrap input::placeholder { color: #abadae; }
+  .pw-wrap .eye-btn {
+    flex-shrink: 0;
+    padding: 0 0.75rem;
+    color: #757778;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.15s;
+    line-height: 1;
+  }
+  .pw-wrap .eye-btn:hover { color: #2c2f30; }
+</style>
+<script>
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+    } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+    }
+</script>
 </head>
-<body>
-    <div class="signup-container">
-        <div class="signup-header">
-            <h1>Sign Up</h1>
-            <p>Create your PRODVI account</p>
+<body class="bg-[#d6d6fb] dark:bg-slate-900 text-on-surface dark:text-slate-100 min-h-screen flex items-center justify-center p-6 relative overflow-hidden selection:bg-primary-container transition-colors duration-300">
+
+<!-- Ambient blobs -->
+<div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+<main class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-0 shadow-2xl shadow-primary/10 rounded-[2rem] overflow-hidden border border-white/20 z-10">
+
+  <!-- Left: Brand panel -->
+  <div class="lg:col-span-5 brand-gradient p-12 flex flex-col justify-between text-white relative overflow-hidden">
+    <div class="relative z-10 space-y-8">
+      <!-- BIGGER logo in brand panel -->
+      <div class="flex items-center gap-0">
+        <img alt="PRODVI Logo" class="h-24 w-auto object-contain" src="{% static 'evaluation/images/logo.png' %}"/>
+        <span class="-ml-2 text-2xl font-black tracking-tight">PRODVI</span>
+      </div>
+      <div>
+        <h1 class="text-4xl lg:text-5xl font-extrabold leading-tight mb-5 tracking-tight">
+          Start your<br>assessment <span class="text-white/70">journey.</span>
+        </h1>
+        <p class="text-lg text-white/80 font-medium leading-relaxed max-w-sm">
+          Join the next generation of performance management. Seamless, data-driven, and human-centric.
+        </p>
+      </div>
+      <div class="flex items-center gap-4 p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/10">
+        <div class="flex -space-x-2">
+          <div class="h-8 w-8 rounded-full border-2 border-indigo-700 bg-slate-200"></div>
+          <div class="h-8 w-8 rounded-full border-2 border-indigo-700 bg-slate-300"></div>
+          <div class="h-8 w-8 rounded-full border-2 border-indigo-700 bg-purple-200"></div>
         </div>
-
-        <!-- Display messages -->
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        <form method="post" action="{% url 'signup' %}">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" name="username" id="username" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" name="password" id="password" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="confirm_password">Confirm Password</label>
-                <input type="password" name="confirm_password" id="confirm_password" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="role">Role</label>
-                <select name="role" id="role" required>
-                    <option value="employee">Employee</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="department">Department (optional)</label>
-                <input type="text" name="department" id="department">
-            </div>
-            
-            <div class="form-group">
-                <label for="employee_id">Employee ID (optional)</label>
-                <input type="text" name="employee_id" id="employee_id">
-            </div>
-            
-            <button type="submit" class="signup-btn">Sign Up</button>
-        </form>
-
-        <div class="signup-footer">
-            <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
-        </div>
+        <span class="text-sm font-semibold">Over 12k+ teams trust PRODVI</span>
+      </div>
     </div>
-</body>
-</html>
+    <div class="absolute -bottom-16 -right-16 opacity-10 pointer-events-none">
+      <span class="material-symbols-outlined text-[280px]" style="font-variation-settings:'FILL' 1;">rocket_launch</span>
+    </div>
+  </div>
+
+  <!-- Right: Form -->
+  <div class="lg:col-span-7 glass-panel p-8 lg:p-12">
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h2 class="text-2xl font-bold">Create Account</h2>
+        <p class="text-on-surface-variant text-sm mt-1">Fill in your professional details</p>
+      </div>
+      <div class="text-right">
+        <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Step 01/01</p>
+        <div class="h-1.5 w-24 bg-surface-container rounded-full overflow-hidden">
+          <div class="h-full w-full bg-primary rounded-full"></div>
+        </div>
+      </div>
+    </div>
+
+    {% if messages %}
+    <div id="django-messages" class="hidden">
+      {% for message in messages %}<span data-type="{{ message.tags }}">{{ message }}</span>{% endfor %}
+    </div>
+    {% endif %}
+
+    <form id="signup-form" action="{% url 'signup' %}" method="POST" class="space-y-5" novalidate>
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Username</label>
+          <input class="input-field" name="username" placeholder="j.doe_prodvi" type="text" required
+            value="{{ form_data.username|default:'' }}"/>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Email Address</label>
+          <input class="input-field" name="email" placeholder="john.doe@company.com" type="email" required
+            value="{{ form_data.email|default:'' }}"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Password</label>
+          <div class="pw-wrap">
+            <input id="reg-password" name="password" placeholder="••••••••" type="password" required/>
+            <button class="eye-btn" type="button" data-toggle-password="reg-password" aria-label="Toggle password">
+              <span class="material-symbols-outlined text-[20px]">visibility</span>
+            </button>
+          </div>
+          <!-- Strength bar -->
+          <div class="h-1 w-full bg-surface-container rounded-full overflow-hidden mt-1">
+            <div id="strength-bar" class="h-full w-0 rounded-full transition-all duration-400"></div>
+          </div>
+          <p id="strength-label" class="text-[11px] text-on-surface-variant font-medium mt-0.5 h-4"></p>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Confirm Password</label>
+          <div class="pw-wrap">
+            <input id="reg-confirm" name="confirm_password" placeholder="••••••••" type="password" required/>
+            <button class="eye-btn" type="button" data-toggle-password="reg-confirm" aria-label="Toggle confirm password">
+              <span class="material-symbols-outlined text-[20px]">visibility</span>
+            </button>
+          </div>
+          <!-- Spacer to match password strength bar height exactly -->
+          <div class="h-1 w-full bg-transparent mt-1"></div>
+          <p class="h-4 mt-0.5"></p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Role</label>
+          <select name="role" class="input-field">
+            <option value="employee" {% if form_data.role == 'employee' or not form_data %}selected{% endif %}>Employee</option>
+            <option value="admin" {% if form_data.role == 'admin' %}selected{% endif %}>Admin</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Department</label>
+          <input class="input-field" name="department" placeholder="Engineering" type="text"
+            value="{{ form_data.department|default:'' }}"/>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Employee ID</label>
+          <input class="input-field" name="employee_id" placeholder="PRD-4492" type="text"
+            value="{{ form_data.employee_id|default:'' }}"/>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-3">
+        <input class="mt-0.5 rounded border-outline-variant text-primary focus:ring-primary flex-shrink-0" id="terms" name="terms" type="checkbox"/>
+        <label class="text-xs text-on-surface-variant leading-relaxed" for="terms">
+          I agree to the <a class="text-primary font-semibold hover:underline" href="#">Terms of Service</a> and <a class="text-primary font-semibold hover:underline" href="#">Privacy Policy</a>.
+        </label>
+      </div>
+      <p id="terms-error" class="text-xs text-error font-medium hidden">You must agree to the Terms of Service and Privacy Policy.</p>
+
+      <div class="pt-2">
+        <button id="signup-btn" class="w-full brand-gradient text-white font-bold py-4 rounded-[1rem] shadow-lg shadow-primary/30 hover:scale-[1.02] active:scale-[0.97] transition-all duration-200 flex items-center justify-center gap-2 group" type="submit">
+          <span>Sign Up</span>
+          <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </button>
+        <p class="text-center text-sm text-on-surface-variant mt-6">
+          Already have an account? <a class="text-primary font-bold hover:underline ml-1" href="{% url 'login' %}">Log In</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</main>
+
+<script src="{% static 'evaluation/js/ui.js' %}"></script>
+<script>
+  document.querySelectorAll('#django-messages span').forEach(el => {
+    const type = el.dataset.type.includes('error') ? 'error' : 'success';
+    ProdviUI.toast.show(el.textContent, type);
+  });
+  ProdviUI.passwordToggle.init();
+  ProdviUI.validate.init(document.getElementById('signup-form'));
+  ProdviUI.passwordStrength.init(
+    document.getElementById('reg-password'),
+    document.getElementById('strength-bar'),
+    document.getElementById('strength-label')
+  );
+
+  // Client-side terms check — block submit if unchecked
+  document.getElementById('signup-form').addEventListener('submit', function(e) {
+    const terms = document.getElementById('terms');
+    const termsError = document.getElementById('terms-error');
+    if (!terms.checked) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      termsError.classList.remove('hidden');
+      terms.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
+    termsError.classList.add('hidden');
+  }, true); // capture phase so it runs before ProdviUI.loading
+
+  ProdviUI.loading.attach(document.getElementById('signup-form'));
+</script>
+</body></html>

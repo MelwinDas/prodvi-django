@@ -1,152 +1,275 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Review {{ colleague.username }} - PRODVI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Review Colleague | PRODVI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-primary": "#7991ff",
+                        "on-tertiary-container": "#002f69",
+                        "primary-fixed": "#859aff",
+                        "tertiary": "#0058ba",
+                        "tertiary-container": "#89b0ff",
+                        "surface-tint": "#3952bc",
+                        "error": "#b41340",
+                        "primary": "#3952bc",
+                        "on-tertiary-fixed": "#00173a",
+                        "on-secondary-fixed-variant": "#663c92",
+                        "error-container": "#f74b6d",
+                        "on-secondary-fixed": "#481c73",
+                        "secondary-fixed-dim": "#dab4ff",
+                        "primary-dim": "#2b45af",
+                        "on-primary-fixed": "#000000",
+                        "inverse-surface": "#0c0f10",
+                        "surface-dim": "#d1d5d7",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#2c2f30",
+                        "on-surface-variant": "#595c5d",
+                        "outline": "#757778",
+                        "surface": "#f5f6f7",
+                        "on-primary": "#f2f1ff",
+                        "tertiary-dim": "#004da4",
+                        "on-background": "#2c2f30",
+                        "secondary": "#72479e",
+                        "on-tertiary-fixed-variant": "#003779",
+                        "tertiary-fixed-dim": "#71a2ff",
+                        "surface-container-low": "#eff1f2",
+                        "on-tertiary": "#f0f2ff",
+                        "surface-variant": "#dadddf",
+                        "surface-container": "#e6e8ea",
+                        "on-primary-fixed-variant": "#00207e",
+                        "error-dim": "#a70138",
+                        "surface-container-highest": "#dadddf",
+                        "outline-variant": "#abadae",
+                        "on-secondary-container": "#5d3288",
+                        "secondary-dim": "#653b91",
+                        "secondary-container": "#e4c6ff",
+                        "on-error-container": "#510017",
+                        "primary-fixed-dim": "#748cf9",
+                        "on-primary-container": "#001867",
+                        "on-error": "#ffefef",
+                        "on-secondary": "#fbefff",
+                        "surface-bright": "#f5f6f7",
+                        "surface-container-high": "#e0e3e4",
+                        "inverse-on-surface": "#9b9d9e",
+                        "tertiary-fixed": "#89b0ff",
+                        "primary-container": "#859aff",
+                        "background": "#f5f6f7",
+                        "secondary-fixed": "#e4c6ff"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
         }
-
-        .review-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .review-header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 20px;
-        }
-
-        .colleague-info {
-            background: #e8f5e8;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            border-left: 4px solid #28a745;
-        }
-
-        .question-group {
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #007bff;
-        }
-
-        .question-number {
-            color: #007bff;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-        }
-
-        .question-text {
-            color: #333;
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 15px;
-        }
-
-        .answer-textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            min-height: 100px;
-            resize: vertical;
-            transition: all 0.3s ease;
-        }
-
-        .answer-textarea:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3);
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-    </style>
+    </script>
+<style>
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  .glass-card{background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+  .ghost-border{outline:1px solid rgba(117,119,120,0.10);}
+  .brand-gradient{background:linear-gradient(135deg,#3952bc 0%,#72479e 100%);}
+  input[type=range]{appearance:none;height:8px;border-radius:999px;outline:none;cursor:pointer;background:linear-gradient(to right,#3952bc var(--val,60%),#e0e3e4 var(--val,60%));}
+  input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;border-radius:50%;background:#3952bc;border:3px solid white;box-shadow:0 2px 8px rgba(57,82,188,0.4);cursor:pointer;transition:transform 0.15s;}
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+  .sidebar-link{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:0.875rem;font-size:0.875rem;font-weight:500;color:#595c5d;transition:all 0.2s;}
+  .sidebar-link:hover{background:#eff1f2;color:#3952bc;}
+</style>
+<link rel="icon" type="image/png" href="{% static 'evaluation/images/favicon.png' %}">
 </head>
-<body>
-    <div class="review-container">
-        <a href="{% url 'employee_dashboard' %}" class="back-link">← Back to Dashboard</a>
-        
-        <div class="review-header">
-            <h1>Peer Review</h1>
-            <h2 style="color: #667eea;">{{ form.title }}</h2>
-        </div>
+<body class="bg-surface text-on-surface font-body min-h-screen flex">
 
-        <div class="colleague-info">
-            <h3>You are reviewing: <strong>{{ colleague.username }}</strong></h3>
-            {% if colleague.department %}
-                <p><strong>Department:</strong> {{ colleague.department }}</p>
-            {% endif %}
-            <p style="margin-top: 10px; font-style: italic;">Please provide honest and constructive feedback about your colleague's performance and collaboration.</p>
+<!-- SideNavBar Anchor -->
+<aside class="hidden md:flex flex-col gap-2 p-4 h-screen w-64 border-r border-slate-200/30 dark:border-slate-800/30 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-lg fixed left-0 top-0 z-40">
+<div class="flex items-center gap-3 px-2 mb-8 mt-2">
+    <a href="{% url 'employee_dashboard' %}" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl overflow-hidden shadow-sm">
+            <img class="w-full h-full object-cover" src="{% static 'evaluation/images/logo.png' %}"/>
         </div>
-
-        <form method="post">
-            {% csrf_token %}
-            
-            {% for question in form.questions %}
-                <div class="question-group">
-                    <div class="question-number">Question {{ forloop.counter }} of {{ form.questions|length }}</div>
-                    <div class="question-text">{{ question.text }}</div>
-                    <textarea 
-                        name="question_{{ forloop.counter0 }}" 
-                        class="answer-textarea" 
-                        placeholder="Share your thoughts about {{ colleague.username }}'s performance in this area..."
-                        required
-                    ></textarea>
-                </div>
-            {% endfor %}
-            
-            <button type="submit" class="submit-btn">Submit Review for {{ colleague.username }}</button>
-        </form>
+        <div>
+            <h1 class="text-lg font-black text-slate-800 dark:text-slate-200 tracking-tight leading-none">PRODVI</h1>
+            <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mt-1">Colleague Review</p>
+        </div>
+    </a>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-all" href="{% url 'employee_dashboard' %}">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-['Inter'] text-sm font-semibold">Dashboard</span>
+</a>
+</nav>
+<div class="mt-auto px-4 pb-4">
+    <div class="flex items-center gap-3">
+        <div class="text-right">
+            <p class="text-xs font-bold text-on-surface">{{ request.user.username }}</p>
+            <p class="text-[10px] text-on-surface-variant">Reviewer</p>
+        </div>
+        <a href="{% url 'logout' %}" class="p-2 text-error/80 hover:text-error transition-colors">
+            <span class="material-symbols-outlined">logout</span>
+        </a>
     </div>
-</body>
-</html>
+</div>
+</aside>
+
+<div class="flex-1 md:ml-64 flex flex-col">
+<main class="mt-8 p-4 md:p-8 max-w-5xl mx-auto w-full">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+<div class="space-y-1">
+<h2 class="text-3xl font-bold tracking-tight text-on-surface">Review for {{ colleague.username }}</h2>
+<p class="text-on-surface-variant font-medium">{{ form.title }} Assessment Cycle</p>
+</div>
+<div class="flex flex-col items-end gap-2 w-full md:w-64">
+<div class="flex justify-between w-full text-xs font-bold text-primary tracking-wider uppercase">
+<span>Assessment Progress</span>
+<span id="progress-text">0% Complete</span>
+</div>
+<div class="w-full h-2.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-secondary w-0 rounded-full transition-all duration-500" id="progress-bar"></div>
+</div>
+</div>
+</div>
+
+<form method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    {% csrf_token %}
+<!-- Sticky Left Sidebar (Colleague Info) -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<div class="glass-card p-6 rounded-3xl ghost-border shadow-sm sticky top-24">
+<div class="flex items-center gap-2 mb-6 border-b border-outline/10 pb-4">
+<span class="material-symbols-outlined text-primary">person</span>
+<h3 class="font-bold text-lg text-on-surface">Teammate Details</h3>
+</div>
+<div class="space-y-6">
+    <div class="flex flex-col items-center text-center gap-4">
+        <div class="w-24 h-24 rounded-3xl bg-primary-container flex items-center justify-center text-primary text-3xl font-bold shadow-inner">
+            {{ colleague.username|slice:":1"|upper }}
+        </div>
+        <div>
+            <p class="font-black text-xl text-on-surface">{{ colleague.username }}</p>
+            <p class="text-sm text-on-surface-variant font-bold uppercase tracking-widest mt-1">{{ colleague.department }}</p>
+            <p class="text-xs text-on-surface-variant opacity-60 mt-2 italic px-4">Providing honest feedback helps build better teams.</p>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+<!-- Form Content Area -->
+<div class="lg:col-span-8 space-y-8">
+<section class="space-y-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">analytics</span>
+<h3 class="font-bold text-xl text-on-surface">Questionnaire</h3>
+</div>
+
+{% for question in questions %}
+<div class="glass-card p-8 rounded-3xl ghost-border shadow-sm flex flex-col gap-6 transition-all hover:shadow-xl hover:shadow-primary/5 group">
+    <div class="flex items-start justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                <span class="font-bold">{{ forloop.counter }}</span>
+            </div>
+            <div>
+                <h4 class="font-bold text-lg text-on-surface">{{ question.text }}</h4>
+            </div>
+        </div>
+    </div>
+        <div class="space-y-4">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Rating</label>
+                <div class="flex items-center gap-2">
+                  <span id="rating-label-{{ forloop.counter }}" class="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Average</span>
+                  <span id="rating-val-{{ forloop.counter }}" class="w-7 h-7 rounded-full brand-gradient text-white flex items-center justify-center font-bold text-sm shadow">3</span>
+                </div>
+              </div>
+              <input name="ratings_{{ question.id }}" required type="range" min="1" max="5" value="3" class="w-full"
+                data-index="{{ forloop.counter }}"
+                oninput="updateSlider(this, {{ forloop.counter }}); updateProgress()"/>
+              <div class="flex justify-between text-[10px] text-on-surface-variant mt-1">
+                <span>Poor</span><span>Below Avg</span><span>Average</span><span>Good</span><span>Excellent</span>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Tell us more</label>
+                <span class="char-counter text-[11px] text-on-surface-variant">0 chars</span>
+              </div>
+              <textarea name="answers_{{ question.id }}" required class="w-full bg-surface-container-low border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none min-h-[110px] placeholder:text-slate-400 transition-shadow" placeholder="Provide specific examples and detailed feedback..." oninput="updateCharCount(this); updateProgress()"></textarea>
+            </div>
+        </div>
+</div>
+{% endfor %}
+</section>
+
+<!-- Form Actions -->
+<footer class="flex items-center justify-end gap-4 pt-8 pb-12">
+    <a href="{% url 'employee_dashboard' %}" id="cancel-btn" class="px-8 py-3 rounded-2xl text-on-surface-variant font-bold text-sm hover:bg-surface-container transition-all">Cancel</a>
+    <button type="submit" id="submit-btn" class="px-12 py-4 rounded-2xl brand-gradient text-white font-bold text-sm shadow-xl shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-[20px]">send</span>
+        Submit Feedback
+    </button>
+</footer>
+</div>
+</form>
+</main>
+</div>
+
+<script src="{% static 'evaluation/js/ui.js' %}"></script>
+<script>
+  const ratingLabels = {1:'Poor',2:'Below Avg',3:'Average',4:'Good',5:'Excellent'};
+  const ratingColors = {1:'#b41340',2:'#f59e0b',3:'#6366f1',4:'#3b82f6',5:'#10b981'};
+
+  function updateSlider(input, idx) {
+    const v = parseInt(input.value);
+    const pct = ((v - 1) / 4) * 100;
+    input.style.setProperty('--val', pct + '%');
+    document.getElementById('rating-val-' + idx).textContent = v;
+    const lbl = document.getElementById('rating-label-' + idx);
+    lbl.textContent = ratingLabels[v];
+    lbl.style.color = ratingColors[v];
+    lbl.style.background = ratingColors[v] + '18';
+  }
+
+  function updateCharCount(textarea) {
+    const counter = textarea.closest('div').previousElementSibling?.querySelector('.char-counter') 
+      || textarea.closest('.space-y-4').querySelector('.char-counter');
+    if (counter) counter.textContent = textarea.value.length + ' chars';
+  }
+
+  function updateProgress() {
+    const textareas = document.querySelectorAll('textarea[required]');
+    let completed = 0;
+    textareas.forEach(ta => { if (ta.value.trim().length > 0) completed++; });
+    const pct = Math.round((completed / textareas.length) * 100);
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-text').innerText = pct + '% Complete';
+  }
+
+  // Init sliders
+  document.querySelectorAll('input[type=range]').forEach(s => updateSlider(s, s.dataset.index));
+  document.addEventListener('DOMContentLoaded', updateProgress);
+
+  // Loading state + dirty warning
+  let isDirty = false;
+  const form = document.querySelector('form');
+  form.addEventListener('input', () => isDirty = true);
+  document.getElementById('cancel-btn').addEventListener('click', e => {
+    if (isDirty && !confirm('You have unsaved feedback. Leave anyway?')) e.preventDefault();
+  });
+  ProdviUI.loading.attach(form, '#submit-btn');
+</script>
+
+</body></html>

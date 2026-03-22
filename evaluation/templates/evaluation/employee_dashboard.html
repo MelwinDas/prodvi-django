@@ -1,230 +1,201 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Dashboard - PRODVI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .content-section {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid #007bff;
-        }
-
-        .colleague-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .colleague-card {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            text-align: center;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: inline-block;
-            margin: 5px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white;
-        }
-
-        .btn-summary {
-            background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
-            color: white;
-        }
-
-        .btn-completed {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .progress-bar {
-            background: #e9ecef;
-            border-radius: 10px;
-            height: 8px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            height: 100%;
-            transition: width 0.3s ease;
-        }
-
-        .messages {
-            margin-bottom: 20px;
-        }
-
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .section-header {
-            margin-bottom: 20px;
-        }
-
-        .btn-group {
-            margin-top: 15px;
-        }
-
-        .status-complete {
-            color: #28a745;
-            font-weight: 500;
-        }
-    </style>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Employee Dashboard - PRODVI</title>
+<link rel="icon" type="image/png" href="{% static 'evaluation/images/favicon.png' %}">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config={darkMode:"class",theme:{extend:{colors:{
+    "primary":"#3952bc","secondary":"#72479e","tertiary":"#0058ba",
+    "surface":"#f5f6f7","surface-container-low":"#eff1f2","surface-container":"#e6e8ea","surface-container-lowest":"#ffffff",
+    "on-surface":"#2c2f30","on-surface-variant":"#595c5d","outline":"#757778","outline-variant":"#abadae",
+    "error":"#b41340","primary-container":"#859aff","secondary-container":"#e4c6ff"
+  },fontFamily:{body:["Inter"]}}}}
+</script>
+<style>
+  body{font-family:'Inter',sans-serif;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  .glass-card{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);border:1px solid rgba(117,119,120,0.08);}
+  .brand-gradient{background:linear-gradient(135deg,#3952bc 0%,#72479e 100%);}
+  .sidebar-link{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:0.875rem;font-size:0.875rem;font-weight:500;color:#595c5d;transition:all 0.2s;}
+  .sidebar-link:hover{background:#eff1f2;color:#3952bc;transform:translateX(2px);}
+  .sidebar-link.active{background:white;color:#3952bc;font-weight:700;box-shadow:0 2px 8px rgba(57,82,188,0.12);}
+  .colleague-card{transition:transform 0.2s,box-shadow 0.2s,background 0.2s;}
+  .colleague-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(57,82,188,0.10);}
+  .stat-card{transition:transform 0.2s,box-shadow 0.2s;}
+  .stat-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(57,82,188,0.12);}
+</style>
 </head>
-<body>
-    <div class="dashboard-container">
-        <div class="header">
-            <h1>Peer Review Dashboard</h1>
-            <div>
-                <span>Welcome, <strong>{{ user.username }}</strong></span>
-                <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
-            </div>
-        </div>
+<body class="bg-surface text-on-surface min-h-screen">
 
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+{% if messages %}
+<div id="django-messages" class="hidden">
+  {% for message in messages %}<span data-type="{{ message.tags }}">{{ message }}</span>{% endfor %}
+</div>
+{% endif %}
 
-        <div class="content-section">
-            <div class="section-header">
-                <h2>Assigned Peer Reviews</h2>
-            </div>
-            
-            {% for item in forms_with_colleagues %}
-                <div class="form-card">
-                    <h3>{{ item.form.title }}</h3>
-                    <p><strong>Description:</strong> {{ item.form.description|default:"No description" }}</p>
-                    <p><strong>Progress:</strong> {{ item.reviewed_count }} of {{ item.total_colleagues }} colleagues reviewed</p>
-                    
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: {% widthratio item.reviewed_count item.total_colleagues 100 %}%"></div>
-                    </div>
-
-                    {% if item.pending_colleagues %}
-                        <h4 style="margin-top: 15px;">Colleagues to Review:</h4>
-                        <div class="colleague-list">
-                            {% for colleague in item.pending_colleagues %}
-                                <div class="colleague-card">
-                                    <h4>{{ colleague.username }}</h4>
-                                    {% if colleague.department %}
-                                        <p style="color: #666; font-size: 0.9rem;">{{ colleague.department }}</p>
-                                    {% endif %}
-                                    <a href="{% url 'review_colleague' item.form.id colleague.id %}" class="btn btn-primary">Review</a>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="status-complete" style="margin-top: 15px;">✅ All colleagues reviewed for this form!</p>
-                    {% endif %}
-
-                    <div class="btn-group">
-                        <a href="{% url 'my_summary' item.form.id %}" class="btn btn-summary">View My Performance Summary</a>
-                    </div>
-                </div>
-            {% empty %}
-                <p style="text-align: center; color: #666;">No peer review forms assigned to you at the moment.</p>
-            {% endfor %}
-        </div>
-
-        <div class="content-section">
-            <div class="section-header">
-                <h2>Completed Reviews</h2>
-            </div>
-            
-            {% for review in completed_reviews %}
-                <div class="form-card" style="border-left-color: #28a745;">
-                    <h4>{{ review.form.title }}</h4>
-                    <p><strong>Reviewed:</strong> {{ review.reviewee.username }}</p>
-                    <p><strong>Submitted:</strong> {{ review.submitted_at|date:"M d, Y at H:i" }}</p>
-                    <span class="btn btn-completed" style="font-size: 0.8rem;">✓ Completed</span>
-                </div>
-            {% empty %}
-                <p style="text-align: center; color: #666;">No completed reviews yet.</p>
-            {% endfor %}
-        </div>
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm flex justify-between items-center px-8 h-16 border-b border-slate-200/50">
+  <div class="flex items-center gap-4">
+    <img class="h-9 w-auto object-contain" src="{% static 'evaluation/images/logo.png' %}" alt="PRODVI"/>
+    <span class="text-xl font-black bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight">PRODVI</span>
+  </div>
+  <div class="flex items-center gap-4">
+    <button class="p-2 rounded-full hover:bg-slate-100 transition-colors text-on-surface-variant">
+      <span class="material-symbols-outlined">notifications</span>
+    </button>
+    <div class="h-8 w-px bg-slate-200"></div>
+    <div class="flex items-center gap-3">
+      <div class="text-right hidden sm:block">
+        <p class="text-xs font-bold text-on-surface">{{ request.user.username }}</p>
+        <p class="text-[10px] text-on-surface-variant">{{ request.user.department }}</p>
+      </div>
+      <img class="h-9 w-9 rounded-full ring-2 ring-primary/20" src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff" alt="Avatar"/>
+      <a href="{% url 'logout' %}" class="p-2 text-error/70 hover:text-error transition-colors ml-1">
+        <span class="material-symbols-outlined">logout</span>
+      </a>
     </div>
-</body>
-</html>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<aside class="hidden lg:flex h-screen w-64 fixed left-0 top-0 pt-20 flex-col gap-2 p-4 border-r border-slate-200/50 bg-slate-50">
+  <div class="mb-4 px-2">
+    <h2 class="text-sm font-black text-slate-900 tracking-tight">PRODVI Hub</h2>
+    <p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold mt-0.5">Employee Portal</p>
+  </div>
+  <nav class="flex flex-col gap-1">
+    <a class="sidebar-link active" href="{% url 'employee_dashboard' %}">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">dashboard</span> Dashboard
+    </a>
+    {% if forms_with_colleagues %}
+      {% for item in forms_with_colleagues %}
+      <a class="sidebar-link" href="{% url 'fill_evaluation' item.form.id %}">
+        <span class="material-symbols-outlined">edit_square</span>
+        <span class="truncate">Self Eval</span>
+      </a>
+      <a class="sidebar-link" href="{% url 'my_summary' item.form.id %}">
+        <span class="material-symbols-outlined">summarize</span>
+        <span class="truncate">My Summary</span>
+      </a>
+      {% endfor %}
+    {% endif %}
+  </nav>
+</aside>
+
+<main class="lg:ml-64 pt-20 px-6 pb-20">
+
+  <!-- Welcome Hero -->
+  <section class="mt-6 mb-8 relative overflow-hidden rounded-3xl px-8 py-10 brand-gradient text-white shadow-xl shadow-primary/20">
+    <div class="relative z-10">
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Welcome back, {{ request.user.username }}! 👋</h1>
+      <p class="text-white/80 text-base font-medium max-w-xl">Here's your performance dashboard. Keep up the great work!</p>
+    </div>
+    <div class="absolute -right-8 -bottom-8 opacity-10 pointer-events-none">
+      <span class="material-symbols-outlined text-[200px]" style="font-variation-settings:'FILL' 1;">star</span>
+    </div>
+  </section>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+    <div class="glass-card stat-card p-6 rounded-3xl flex items-start justify-between cursor-default">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant opacity-60 mb-1">Pending Reviews</p>
+        <h3 class="text-3xl font-extrabold" id="pending-count">0</h3>
+      </div>
+      <div class="bg-amber-500/10 p-3 rounded-full text-amber-600">
+        <span class="material-symbols-outlined">pending_actions</span>
+      </div>
+    </div>
+    <div class="glass-card stat-card p-6 rounded-3xl flex items-start justify-between cursor-default">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant opacity-60 mb-1">Completed Reviews</p>
+        <h3 class="text-3xl font-extrabold" data-countup="{{ completed_reviews.count }}">{{ completed_reviews.count }}</h3>
+      </div>
+      <div class="bg-emerald-500/10 p-3 rounded-full text-emerald-600">
+        <span class="material-symbols-outlined">task_alt</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+
+    <!-- Pending Reviews -->
+    <div class="xl:col-span-2">
+      <div class="glass-card rounded-3xl p-6 h-full">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-lg font-bold">Pending Reviews</h2>
+          <span class="text-xs font-bold text-on-surface-variant bg-surface-container px-3 py-1 rounded-full" id="pending-badge">0 left</span>
+        </div>
+        <div class="space-y-3">
+          {% for item in forms_with_colleagues %}
+            {% for colleague in item.pending_colleagues %}
+            <div class="colleague-card flex items-center justify-between p-4 bg-surface-container-low rounded-2xl">
+              <div class="flex items-center gap-4">
+                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-base">
+                  {{ colleague.username|slice:":1"|upper }}
+                </div>
+                <div>
+                  <h4 class="font-bold text-on-surface text-sm">{{ colleague.username }}</h4>
+                  <p class="text-xs text-on-surface-variant">{{ item.form.title }}</p>
+                </div>
+              </div>
+              <a href="{% url 'review_colleague' item.form.id colleague.id %}" class="review-btn brand-gradient text-white px-5 py-2 rounded-full text-xs font-bold shadow-md hover:scale-105 hover:shadow-lg active:scale-95 transition-all">
+                Start Review
+              </a>
+            </div>
+            {% endfor %}
+          {% empty %}
+          <div class="text-center py-12 flex flex-col items-center gap-3 text-on-surface-variant">
+            <span class="material-symbols-outlined text-5xl text-emerald-400">check_circle</span>
+            <p class="font-semibold">All caught up! No pending reviews.</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- My Performance Summaries -->
+    <div>
+      <div class="glass-card rounded-3xl p-6 h-full">
+        <h2 class="text-lg font-bold mb-6">My Summaries</h2>
+        <div class="space-y-3">
+          {% for item in forms_with_colleagues %}
+          <a href="{% url 'my_summary' item.form.id %}" class="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl hover:bg-primary/5 hover:translate-x-1 transition-all group">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[18px]">summarize</span>
+              </div>
+              <span class="text-sm font-semibold truncate max-w-[140px]">{{ item.form.title }}</span>
+            </div>
+            <span class="material-symbols-outlined text-on-surface-variant text-[18px] group-hover:text-primary transition-colors">arrow_forward_ios</span>
+          </a>
+          {% empty %}
+          <p class="text-sm text-on-surface-variant text-center py-8">No forms assigned yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="{% static 'evaluation/js/ui.js' %}"></script>
+<script>
+  document.querySelectorAll('#django-messages span').forEach(el => {
+    ProdviUI.toast.show(el.textContent, el.dataset.type.includes('error') ? 'error' : 'success');
+  });
+
+  // Pending count
+  const reviewBtns = document.querySelectorAll('.review-btn');
+  const count = reviewBtns.length;
+  document.getElementById('pending-count').textContent = count;
+  document.getElementById('pending-badge').textContent = count + ' left';
+
+  ProdviUI.countUp.init('[data-countup]');
+</script>
+</body></html>

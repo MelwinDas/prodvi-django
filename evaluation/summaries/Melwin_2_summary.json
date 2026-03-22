@@ -2,24 +2,27 @@
   "name": "Melwin",
   "questions": [
     {
-      "question": "Does he request for deadline extensions often?",
+      "question": "What are their key strengths?",
       "answers": [
-        "Not often (by Mel2)",
-        "NO never (by Mel3)"
+        "Good listener and respectful team player,Calm under pressure. (by Larson)"
       ]
     },
     {
-      "question": "Does he remain calm when faced with changing deadlines?",
+      "question": "What areas could they improve?",
       "answers": [
-        "Yes he's calm (by Mel2)",
-        "yes very calm he's proffesional (by Mel3)"
+        "Be more vocal with ideas.Take more lead in projects (by Larson)"
       ]
     },
     {
-      "question": "Is he approachable when it comes to collaboration?",
+      "question": "How would you rate their communication skills?",
       "answers": [
-        "No not at all (by Mel2)",
-        "No never (by Mel3)"
+        "Melwin communicates clearly and is easy to work with. He keeps updates concise and timely, though he could speak up more during group discussions. (by Larson)"
+      ]
+    },
+    {
+      "question": "How effectively do they collaborate with the team?",
+      "answers": [
+        "He works well with others and is always willing to help. He\u2019s dependable in team settings but can take more initiative in group projects. (by Larson)"
       ]
     }
   ]

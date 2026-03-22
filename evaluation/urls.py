@@ -19,6 +19,7 @@ urlpatterns = [
     path('employee-dashboard/', views.employee_dashboard, name='employee_dashboard'),
     path('review-colleague/<int:form_id>/<int:colleague_id>/', views.review_colleague, name='review_colleague'),
     path('my-summary/<int:form_id>/', views.my_summary, name='my_summary'),
+    path('fill-evaluation/<int:form_id>/', views.fill_evaluation, name='fill_evaluation'),
     path('refresh-my-summary/<int:form_id>/', views.refresh_my_summary, name='refresh_my_summary'),  # Add this line
     
     path('output/<int:form_id>/<int:employee_id>/', views.performance_output, name='performance_output'),

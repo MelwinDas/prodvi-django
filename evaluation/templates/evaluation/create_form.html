@@ -1,178 +1,191 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Peer Review Form - PRODVI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .form-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .employee-selection {
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            padding: 15px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .employee-item {
-            display: flex;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .employee-item:last-child {
-            border-bottom: none;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .help-text {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .peer-info {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-    </style>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRODVI - Create Form</title>
+<link rel="icon" type="image/png" href="{% static 'evaluation/images/favicon.png' %}">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config={darkMode:"class",theme:{extend:{colors:{
+    "primary":"#3952bc","secondary":"#72479e","tertiary":"#0058ba",
+    "surface":"#f5f6f7","surface-container-low":"#eff1f2","surface-container":"#e6e8ea","surface-container-lowest":"#ffffff",
+    "on-surface":"#2c2f30","on-surface-variant":"#595c5d","outline":"#757778","outline-variant":"#abadae",
+    "error":"#b41340","primary-container":"#859aff"
+  },fontFamily:{body:["Inter"]}}}}
+</script>
+<style>
+  body{font-family:'Inter',sans-serif;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  .glass-card{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);border:1px solid rgba(0,0,0,0.05);}
+  .brand-gradient{background:linear-gradient(135deg,#3952bc 0%,#72479e 100%);}
+  .section-card{transition:box-shadow 0.2s,border-color 0.2s;}
+  .section-card:hover{box-shadow:0 8px 30px rgba(57,82,188,0.08);}
+  .input-field{width:100%;background:#eff1f2;border:none;outline:2px solid transparent;border-radius:0.875rem;padding:0.875rem 1rem;color:#2c2f30;font-size:0.9375rem;transition:outline-color 0.2s,box-shadow 0.2s;}
+  .input-field:focus{outline-color:#3952bc;box-shadow:0 0 0 4px rgba(57,82,188,0.1);}
+  .sidebar-link{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:0.875rem;font-size:0.875rem;font-weight:500;color:#595c5d;transition:all 0.2s;}
+  .sidebar-link:hover{background:#eff1f2;color:#3952bc;transform:translateX(2px);}
+  .sidebar-link.active{background:white;color:#3952bc;font-weight:700;box-shadow:0 2px 8px rgba(57,82,188,0.12);}
+</style>
 </head>
-<body>
-    <div class="form-container">
-        <a href="{% url 'admin_dashboard' %}" class="back-link">← Back to Dashboard</a>
-        
-        <div class="form-header">
-            <h1>Create Peer Review Form</h1>
-            <p>Create a form for employees to review their colleagues</p>
-        </div>
+<body class="bg-surface text-on-surface min-h-screen">
 
-        <div class="peer-info">
-            <h4>How Peer Reviews Work:</h4>
-            <p>• Each assigned employee will review all other assigned employees</p>
-            <p>• If you assign 3 employees, each will review the other 2 colleagues</p>
-            <p>• ML analysis will be performed on all responses automatically</p>
-        </div>
+{% if messages %}
+<div id="django-messages" class="hidden">
+  {% for message in messages %}<span data-type="{{ message.tags }}">{{ message }}</span>{% endfor %}
+</div>
+{% endif %}
 
-        <form method="post">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="title">Form Title</label>
-                <input type="text" name="title" id="title" required placeholder="e.g., Q1 Peer Performance Review">
-            </div>
-            
-            <div class="form-group">
-                <label for="description">Description (Optional)</label>
-                <textarea name="description" id="description" placeholder="Brief description of this peer review form..."></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="questions">Review Questions</label>
-                <textarea name="questions" id="questions" required placeholder="Enter each question on a new line:&#10;&#10;How would you rate their communication skills?&#10;How effectively do they collaborate with the team?&#10;What are their key strengths?&#10;What areas could they improve?"></textarea>
-                <div class="help-text">Enter each question on a separate line. These questions will be asked about each colleague.</div>
-            </div>
-            
-            <div class="form-group">
-                <label>Select Employees for Peer Review</label>
-                <div class="employee-selection">
-                    {% for employee in employees %}
-                        <div class="employee-item">
-                            <input type="checkbox" name="assigned_employees" value="{{ employee.id }}" id="emp_{{ employee.id }}">
-                            <label for="emp_{{ employee.id }}" style="margin-left: 10px; margin-bottom: 0;">
-                                <strong>{{ employee.username }}</strong>
-                                {% if employee.department %} - {{ employee.department }}{% endif %}
-                                {% if employee.email %} ({{ employee.email }}){% endif %}
-                            </label>
-                        </div>
-                    {% empty %}
-                        <p>No employees found. Create employee accounts first.</p>
-                    {% endfor %}
-                </div>
-                <div class="help-text">Select employees who will participate in peer review. Each will review all others selected.</div>
-            </div>
-            
-            <button type="submit" class="submit-btn">Create Peer Review Form</button>
-        </form>
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-md shadow-sm flex justify-between items-center px-6 h-16 border-b border-slate-200/50">
+  <div class="flex items-center gap-4">
+    <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3">
+      <img alt="PRODVI Logo" class="h-9 w-auto object-contain" src="{% static 'evaluation/images/logo.png' %}"/>
+      <span class="text-xl font-black tracking-tight text-slate-900">PRODVI</span>
+    </a>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="text-right hidden sm:block">
+      <p class="text-xs font-bold text-on-surface">{{ request.user.username }}</p>
+      <p class="text-[10px] text-on-surface-variant">Administrator</p>
     </div>
-</body>
-</html>
+    <img alt="Profile" class="h-9 w-9 rounded-full ring-2 ring-primary/10" src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff"/>
+    <a href="{% url 'logout' %}" class="p-2 text-error/70 hover:text-error transition-colors">
+      <span class="material-symbols-outlined">logout</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-slate-50 border-r border-slate-200/50 flex flex-col py-8 px-4 gap-2 z-30 pt-20">
+  <p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-3 px-2 opacity-50">Main Menu</p>
+  <nav class="space-y-1">
+    <a class="sidebar-link" href="{% url 'admin_dashboard' %}">
+      <span class="material-symbols-outlined">dashboard</span> Dashboard
+    </a>
+    <a class="sidebar-link active" href="{% url 'create_form' %}">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">add_circle</span> Create Form
+    </a>
+  </nav>
+</aside>
+
+<main class="ml-64 pt-24 pb-32 px-8 min-h-screen">
+  <div class="max-w-4xl mx-auto">
+    <header class="mb-10">
+      <h1 class="text-4xl font-extrabold tracking-tight mb-2">Create New Assessment</h1>
+      <p class="text-on-surface-variant">Design a custom evaluation form to gather actionable insights from your team.</p>
+    </header>
+
+    <form id="create-form" method="POST" class="space-y-6" novalidate>
+      {% csrf_token %}
+
+      <!-- Section 1: Basic Info -->
+      <section class="glass-card section-card p-8 rounded-3xl">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined">info</span>
+          </div>
+          <h2 class="text-xl font-bold">Basic Information</h2>
+        </div>
+        <div class="grid grid-cols-1 gap-5">
+          <div>
+            <label class="block text-sm font-semibold mb-1.5">Assessment Title <span class="text-error">*</span></label>
+            <input name="title" required class="input-field" placeholder="e.g., Annual Performance Review 2024" type="text"/>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1.5">Description</label>
+            <textarea name="description" class="input-field" placeholder="Describe the purpose and goals of this assessment…" rows="3"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Questions -->
+      <section class="glass-card section-card p-8 rounded-3xl">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+              <span class="material-symbols-outlined">quiz</span>
+            </div>
+            <h2 class="text-xl font-bold">Questions</h2>
+          </div>
+          <span id="question-count" class="text-xs font-bold text-on-surface-variant bg-surface-container px-3 py-1 rounded-full">0 questions</span>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1.5">Enter Questions <span class="text-on-surface-variant font-normal">(one per line)</span></label>
+          <textarea id="questions-textarea" name="questions" required class="input-field font-mono text-sm leading-6" placeholder="How was their team collaboration?&#10;Rate their technical skills.&#10;What are their key strengths?" rows="10"></textarea>
+        </div>
+      </section>
+
+      <!-- Section 3: Recipients -->
+      <section class="glass-card section-card p-8 rounded-3xl">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary">
+            <span class="material-symbols-outlined">group</span>
+          </div>
+          <h2 class="text-xl font-bold">Assign Employees</h2>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1.5">Select Employees to be Assessed <span class="text-error">*</span></label>
+          <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
+            {% for employee in employees %}
+            <label class="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container-low cursor-pointer transition-colors group">
+              <input type="checkbox" name="assigned_employees" value="{{ employee.id }}" class="rounded text-primary focus:ring-primary"/>
+              <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0">
+                {{ employee.username|slice:":1"|upper }}
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-on-surface">{{ employee.username }}</p>
+                <p class="text-xs text-on-surface-variant">{{ employee.department }}</p>
+              </div>
+            </label>
+            {% empty %}
+            <p class="text-sm text-on-surface-variant text-center py-4">No employees found. Add employees first.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <div class="flex justify-end gap-4 pt-2">
+        <a href="{% url 'admin_dashboard' %}" id="cancel-btn" class="px-8 py-3.5 rounded-xl text-on-surface-variant font-bold text-sm hover:bg-surface-container transition-all">
+          Cancel
+        </a>
+        <button type="submit" id="submit-btn" class="brand-gradient px-12 py-3.5 rounded-xl text-white font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.97] transition-all flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">publish</span> Publish Assessment
+        </button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<script src="{% static 'evaluation/js/ui.js' %}"></script>
+<script>
+  document.querySelectorAll('#django-messages span').forEach(el => {
+    ProdviUI.toast.show(el.textContent, el.dataset.type.includes('error') ? 'error' : 'success');
+  });
+
+  // Live question counter
+  const textarea = document.getElementById('questions-textarea');
+  const counter = document.getElementById('question-count');
+  function updateCount() {
+    const lines = textarea.value.split('\n').filter(l => l.trim().length > 0);
+    counter.textContent = lines.length + ' question' + (lines.length !== 1 ? 's' : '');
+    counter.className = `text-xs font-bold px-3 py-1 rounded-full transition-colors ${lines.length > 0 ? 'bg-primary/10 text-primary' : 'bg-surface-container text-on-surface-variant'}`;
+  }
+  textarea.addEventListener('input', updateCount);
+
+  // Warn before leaving if form is dirty
+  let isDirty = false;
+  document.getElementById('create-form').addEventListener('input', () => isDirty = true);
+  document.getElementById('cancel-btn').addEventListener('click', (e) => {
+    if (isDirty) {
+      if (!confirm('You have unsaved changes. Are you sure you want to leave?')) e.preventDefault();
+    }
+  });
+
+  // Loading state
+  ProdviUI.loading.attach(document.getElementById('create-form'));
+  ProdviUI.validate.init(document.getElementById('create-form'));
+</script>
+</body></html>

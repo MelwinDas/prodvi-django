@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Submission Sent! | PRODVI</title>
+<link rel="icon" type="image/png" href="{% static 'evaluation/images/favicon.png' %}">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config={darkMode:"class",theme:{extend:{colors:{
+    "primary":"#3952bc","secondary":"#72479e","surface":"#f5f6f7","on-surface":"#2c2f30","error":"#b41340"
+  },fontFamily:{body:["Inter"]}}}}
+</script>
+<style>
+  body{font-family:'Inter',sans-serif;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  .brand-gradient{background:linear-gradient(135deg,#3952bc 0%,#72479e 100%);}
+  .checkmark-circle{stroke-dasharray:188;stroke-dashoffset:188;animation:draw 0.8s ease 0.3s forwards;}
+  @keyframes draw{to{stroke-dashoffset:0;}}
+  .hero-scale{animation:popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
+  @keyframes popIn{from{transform:scale(0.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .fade-up{animation:fadeUp 0.5s ease 0.4s both;}
+  @keyframes fadeUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+</style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+
+<!-- Ambient blobs -->
+<div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/8 rounded-full blur-[140px] pointer-events-none"></div>
+<div class="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-secondary/8 rounded-full blur-[140px] pointer-events-none"></div>
+
+<div class="max-w-md w-full bg-white/90 backdrop-blur-2xl p-12 rounded-[3rem] shadow-2xl shadow-indigo-500/10 border border-white/50 text-center z-10">
+
+  <!-- Animated checkmark -->
+  <div class="w-24 h-24 mx-auto mb-8 hero-scale">
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="32" cy="32" r="30" stroke="url(#grad)" stroke-width="4" class="checkmark-circle"/>
+      <path d="M20 33l9 9 16-17" stroke="url(#grad2)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"
+        style="stroke-dasharray:40;stroke-dashoffset:40;animation:draw 0.5s ease 0.9s forwards;"/>
+      <defs>
+        <linearGradient id="grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#3952bc"/><stop offset="1" stop-color="#72479e"/>
+        </linearGradient>
+        <linearGradient id="grad2" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#3952bc"/><stop offset="1" stop-color="#72479e"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+
+  <div class="fade-up space-y-3 mb-10">
+    <h1 class="text-3xl font-black text-slate-900 tracking-tight">Submission Sent!</h1>
+    <p class="text-slate-500 font-medium leading-relaxed text-sm max-w-xs mx-auto">
+      Your evaluation feedback has been securely processed and sent for AI analysis. Thank you for helping build a better team! 🚀
+    </p>
+  </div>
+
+  <div class="fade-up space-y-3">
+    <a href="{% url 'employee_dashboard' %}" class="block w-full py-4 brand-gradient text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] hover:shadow-xl active:scale-[0.97] transition-all">
+      Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="fade-up flex justify-center gap-8 mt-10 pt-8 border-t border-slate-100">
+    <div class="text-center">
+      <p class="text-2xl font-extrabold text-primary">AI</p>
+      <p class="text-xs text-slate-400 font-medium mt-0.5">Powered Analysis</p>
+    </div>
+    <div class="h-10 w-px bg-slate-100"></div>
+    <div class="text-center">
+      <p class="text-2xl font-extrabold text-secondary">100%</p>
+      <p class="text-xs text-slate-400 font-medium mt-0.5">Private & Secure</p>
+    </div>
+    <div class="h-10 w-px bg-slate-100"></div>
+    <div class="text-center">
+      <p class="text-2xl font-extrabold text-emerald-600">✓</p>
+      <p class="text-xs text-slate-400 font-medium mt-0.5">Saved</p>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'evaluation/js/ui.js' %}"></script>
+<script>
+  // Confetti burst on load
+  window.addEventListener('load', () => {
+    setTimeout(() => ProdviUI.confetti.burst(), 600);
+  });
+</script>
+</body></html>

@@ -21,23 +21,33 @@ def landing_page(request):
 
 def signup_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        confirm_password = request.POST.get('confirm_password')
+        username = request.POST.get('username', '')
+        email = request.POST.get('email', '')
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
         role = request.POST.get('role', 'employee')
         department = request.POST.get('department', '')
         employee_id = request.POST.get('employee_id', '')
+        terms = request.POST.get('terms')
 
+        # Preserve form values for re-render
+        form_data = {
+            'username': username, 'email': email, 'role': role,
+            'department': department, 'employee_id': employee_id,
+        }
+
+        if not terms:
+            messages.error(request, 'You must agree to the Terms of Service and Privacy Policy.')
+            return render(request, 'evaluation/signup.html', {'form_data': form_data})
         if password != confirm_password:
-            messages.error(request, 'Passwords do not match')
-            return render(request, 'evaluation/signup.html')
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'evaluation/signup.html', {'form_data': form_data})
         if CustomUser.objects.filter(username=username).exists():
-            messages.error(request, 'Username already exists')
-            return render(request, 'evaluation/signup.html')
+            messages.error(request, 'Username already exists.')
+            return render(request, 'evaluation/signup.html', {'form_data': form_data})
         if CustomUser.objects.filter(email=email).exists():
-            messages.error(request, 'Email already exists')
-            return render(request, 'evaluation/signup.html')
+            messages.error(request, 'Email already exists.')
+            return render(request, 'evaluation/signup.html', {'form_data': form_data})
 
         try:
             CustomUser.objects.create_user(
@@ -52,13 +62,15 @@ def signup_view(request):
             return redirect('login')
         except IntegrityError:
             messages.error(request, 'Employee ID already exists. Please use a different one.')
-            return render(request, 'evaluation/signup.html')
+            return render(request, 'evaluation/signup.html', {'form_data': form_data})
     return render(request, 'evaluation/signup.html')
 
 def login_view(request):
+    submitted_username = ''
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        username = request.POST.get('username', '')
+        password = request.POST.get('password', '')
+        submitted_username = username
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
@@ -67,8 +79,8 @@ def login_view(request):
             else:
                 return redirect('employee_dashboard')
         else:
-            messages.error(request, 'Invalid username or password')
-    return render(request, 'evaluation/login.html')
+            messages.error(request, 'Invalid username or password.')
+    return render(request, 'evaluation/login.html', {'submitted_username': submitted_username})
 
 def logout_view(request):
     logout(request)
@@ -634,3 +646,39 @@ def performance_output(request, form_id, employee_id):
 def my_output(request, form_id):
     """Employee viewing their own performance output"""
     return performance_output(request, form_id, request.user.id)
+@user_passes_test(is_employee)
+def fill_evaluation(request, form_id):
+    form = get_object_or_404(EvaluationForm, id=form_id, is_active=True)
+    
+    if request.user not in form.assigned_employees.all():
+        messages.error(request, 'You are not assigned to this form')
+        return redirect('employee_dashboard')
+
+    # Check if already submitted
+    if EvaluationResponse.objects.filter(form=form, employee=request.user).exists():
+        messages.info(request, 'You have already submitted your self-evaluation for this form')
+        return redirect('employee_dashboard')
+
+    if request.method == 'POST':
+        responses = {}
+        for i, question in enumerate(form.questions):
+            answer = request.POST.get(f"answers_{question.get('id', i)}", '')
+            rating = request.POST.get(f"ratings_{question.get('id', i)}", '')
+            responses[question['text']] = {
+                'answer': answer,
+                'rating': rating
+            }
+
+        EvaluationResponse.objects.create(
+            form=form,
+            employee=request.user,
+            responses=responses
+        )
+
+        messages.success(request, 'Your self-evaluation has been submitted successfully!')
+        return render(request, 'evaluation/submission_result.html')
+
+    return render(request, 'evaluation/fill_evaluation_form.html', {
+        'form': form,
+        'questions': form.questions
+    })

@@ -189,8 +189,8 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # API Keys (from environment variables)
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
-API_KEY = os.environ.get('GEMINI_API_KEY')
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY')
+API_KEY = os.environ.get('GROQ_API_KEY')
 
 # Markdownify configuration
 MARKDOWNIFY = {

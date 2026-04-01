@@ -1,17 +1,17 @@
 import os
 import json
-import google.generativeai as genai
+from groq import Groq
 from django.conf import settings
 
 class FileProcessor:
-    def __init__(self, model_name="gemini-2ra .5-flash"):
+    def __init__(self, model_name="llama-3.3-70b-versatile"):
         # Get API key from environment or Django settings
-        api_key = os.environ.get("GEMINI_API_KEY") or getattr(settings, 'GEMINI_API_KEY', None)
+        api_key = os.environ.get("GROQ_API_KEY") or getattr(settings, 'GROQ_API_KEY', None)
         if not api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment variables or Django settings")
+            raise ValueError("GROQ_API_KEY not found in environment variables or Django settings")
         
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(model_name)
+        self.client = Groq(api_key=api_key)
+        self.model_name = model_name
 
     def process_new_file(self, file_path):
         """Process file content with Gemini API without file upload"""
@@ -74,15 +74,23 @@ speak like a human by taking names of the employee you are evaluating you can al
             """
             
             # Generate response
-            response = self.model.generate_content(prompt)
-            return response.text
+            response = self.client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    }
+                ],
+                model=self.model_name,
+            )
+            return response.choices[0].message.content
             
         except FileNotFoundError:
             return f"Error: File not found at path {file_path}"
         except json.JSONDecodeError as e:
             return f"Error: Invalid JSON format in file - {str(e)}"
         except Exception as e:
-            return f"Error processing with Gemini API: {str(e)}"
+            return f"Error processing with Groq API: {str(e)}"
     
     def _format_peer_review_data(self, data):
         """Format JSON peer review data for better analysis"""

@@ -49,6 +49,15 @@ class EmployeeSummary(models.Model):
     def __str__(self):
         return f"Summary: {self.employee.username} - {self.form.title}"
 
+class TeamSummary(models.Model):
+    """AI-generated team-level summary for all employees in a form."""
+    form = models.OneToOneField(EvaluationForm, on_delete=models.CASCADE, related_name='team_summary')
+    ai_analysis = models.TextField(blank=True)
+    generated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Team Summary: {self.form.title}"
+
 # Keep for backward compatibility if needed
 class EvaluationResponse(models.Model):
     form = models.ForeignKey(EvaluationForm, on_delete=models.CASCADE)

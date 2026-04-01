@@ -113,6 +113,63 @@ speak like a human by taking names of the employee you are evaluating you can al
         
         return formatted
 
+    def process_team_file(self, file_path):
+        """Process team summary file with Gemini API"""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                formatted_content = f.read()
+            
+            prompt = f"""
+You are an expert HR analyst and Team Reviewer. 
+Your task is to analyze the collective peer review feedback for an entire team and provide a comprehensive team-level performance summary.
+
+Below is the compilation of peer review answers for each employee in the team for a particular evaluation cycle. 
+
+TEAM PEER REVIEW DATA:
+{formatted_content}
+
+Instructions:
+1. Analyze the team's overall strengths, weaknesses, and dynamics based on the provided feedback.
+2. Provide a holistic view of the team. Identify common themes, widespread issues, and collective strengths.
+3. Keep the names of individual employees confidential in your summary unless highlighting a specific team-wide positive recognition (but generally avoid pinpointing negative feedback to specific individuals).
+4. Do NOT include a date field in your output.
+5. Structure your output with the following specific sections, using proper Markdown lists (e.g., - for bullets):
+
+*PERFORMANCE SUMMARY:*
+- Overall team performance rating (Excellent/Good/Satisfactory/Needs Improvement)
+- Key team performance indicators
+
+*KEY STRENGTHS:*
+- Top 3-5 collective strengths of the team
+- Examples reflecting team synergy
+
+*AREAS FOR IMPROVEMENT:*
+- 2-3 main areas where the team collectively needs development
+- Constructive suggestions for team growth
+
+*SPECIFIC RECOMMENDATIONS:*
+- Actionable steps for team development and bonding
+- Skills or processes the team should focus on
+
+*PEER FEEDBACK HIGHLIGHTS:*
+- Most positive recurring themes in the feedback
+- General team sentiment
+
+Format the response professionally as an official team performance review document.
+            """
+            
+            response = self.client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model=self.model_name,
+            )
+            return response.choices[0].message.content
+            
+        except FileNotFoundError:
+            return f"Error: File not found at path {file_path}"
+        except Exception as e:
+            return f"Error processing team with Groq API: {str(e)}"
+
+
 # For backward compatibility
 def process_file(file_path):
     """Legacy function for backward compatibility"""

@@ -404,6 +404,95 @@ def check_and_generate_summary(employee, form):
     
     return None
 
+def generate_team_summary_file(form):
+    """Generate summary txt file for the whole team based on all peer reviews"""
+    reviews = PeerReview.objects.filter(form=form)
+    if not reviews.exists():
+        return None
+    
+    lines = []
+    lines.append("{")
+    lines.append(f'form="{form.title}",')
+    lines.append("team_members=[")
+    
+    employees = set(r.reviewee for r in reviews)
+    for emp in employees:
+        emp_reviews = reviews.filter(reviewee=emp)
+        lines.append("    {")
+        lines.append(f'        name="{emp.username}",')
+        lines.append("        questions=[")
+        
+        for question in form.questions:
+            lines.append("            {")
+            lines.append(f'                question="{question["text"]}",')
+            lines.append("                answers=[")
+            
+            answers_for_q = []
+            for review in emp_reviews:
+                if question['text'] in review.responses:
+                    ans_data = review.responses[question['text']]
+                    ans_text = ans_data.get('answer', str(ans_data)) if isinstance(ans_data, dict) else str(ans_data)
+                    
+                    if review.ml_analysis and question['text'] in review.ml_analysis:
+                        pred = review.ml_analysis[question['text']].get('prediction', '')
+                        if pred:
+                            ans_text = f"{ans_text} ({pred})"
+                    
+                    answers_for_q.append(f'                    "{ans_text}"')
+            
+            if answers_for_q:
+                lines.append(",\n".join(answers_for_q))
+                
+            lines.append("                ]")
+            lines.append("            }")
+            
+        lines.append("        ]")
+        lines.append("    }")
+        
+    lines.append("]")
+    lines.append("}")
+    
+    content = "\n".join(lines)
+    
+    summaries_dir = os.path.join(settings.BASE_DIR, 'evaluation', 'summaries')
+    os.makedirs(summaries_dir, exist_ok=True)
+    
+    filename = f"Team_{form.id}_summary.txt"
+    file_path = os.path.join(summaries_dir, filename)
+    
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+        
+    return file_path
+
+def process_team_with_gemini_api(file_path):
+    """Process team summary file with Gemini API"""
+    try:
+        from .ml_models.api import FileProcessor
+        processor = FileProcessor()
+        analysis = processor.process_team_file(file_path)
+        return analysis
+    except Exception as e:
+        print(f"Error in evaluate_with_gemini: {e}")
+        return f"Error processing with Groq API: {str(e)}"
+
+def check_and_generate_team_summary(form):
+    """Generate team summary using all available reviews (no strict completion check)"""
+    reviews = PeerReview.objects.filter(form=form)
+    if not reviews.exists():
+        return None
+        
+    summary, created = TeamSummary.objects.get_or_create(form=form)
+    
+    if created or not summary.ai_analysis or "Error processing with Groq API" in summary.ai_analysis:
+        file_path = generate_team_summary_file(form)
+        if file_path:
+            analysis = process_team_with_gemini_api(file_path)
+            summary.ai_analysis = analysis
+            summary.save()
+            
+    return summary
+
 @user_passes_test(is_employee)
 def my_summary(request, form_id):
     """Employee view to see their own performance summary"""
@@ -979,6 +1068,27 @@ def personal_analytics(request, form_id, employee_id=None):
 
 
 @user_passes_test(is_admin)
+@user_passes_test(is_admin)
+def refresh_team_summary(request, form_id):
+    """Regenerate the team-level AI summary for a form"""
+    form = get_object_or_404(EvaluationForm, id=form_id)
+    
+    try:
+        # Force a regeneration by deleting existing
+        TeamSummary.objects.filter(form=form).delete()
+        file_path = generate_team_summary_file(form)
+        if file_path:
+            analysis = process_team_with_gemini_api(file_path)
+            TeamSummary.objects.create(form=form, ai_analysis=analysis, summary_file_path=file_path if hasattr(TeamSummary, 'summary_file_path') else '')
+        messages.success(request, 'Team summary regenerated successfully')
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f'Failed to regenerate team summary: {e}')
+        
+    return redirect('admin_team_analytics', form_id=form.id)
+
+
 def admin_team_analytics(request, form_id):
     """
     Admin-only team comparison dashboard.
@@ -986,6 +1096,9 @@ def admin_team_analytics(request, form_id):
     """
     form = get_object_or_404(EvaluationForm, id=form_id)
     employees = form.assigned_employees.filter(role='employee')
+
+    # Automatically generate team summary if it doesn't exist
+    team_summary = check_and_generate_team_summary(form)
 
     team_data = []
     all_categories = set()
@@ -1053,4 +1166,5 @@ def admin_team_analytics(request, form_id):
         'radar_datasets_json': json.dumps(radar_datasets),
         'all_categories_json': json.dumps(all_categories),
         'ranking': ranking,
+        'team_summary': team_summary,
     })

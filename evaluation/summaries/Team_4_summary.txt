@@ -1,0 +1,51 @@
+{
+form="Performance Review ",
+team_members=[
+    {
+        name="Kavan",
+        questions=[
+            {
+                question="How was their team collaboration?",
+                answers=[
+                    "He worked well with the team overall. He was helpful when asked and didn’t cause any issues, but he wasn’t always very active in group discussions. He could try to contribute more on his own. (Cooperative)"
+                ]
+            }
+            {
+                question="Rate their Tech skills.",
+                answers=[
+                    "His tech skills are decent. He understands the basics and can get things done, but sometimes needs guidance for more complex tasks. With more practice, he can definitely improve. (Average)"
+                ]
+            }
+            {
+                question="Can they communicate and coordinate with the team",
+                answers=[
+                    "Yes, he can communicate with the team, but sometimes his points aren’t very clear. He does respond when needed, just needs to be a bit more confident and structured while speaking. (Neutral)"
+                ]
+            }
+        ]
+    }
+    {
+        name="Larson",
+        questions=[
+            {
+                question="How was their team collaboration?",
+                answers=[
+                    "Larson is a great listener but could be more vocal during meetings. (Very Easy)"
+                ]
+            }
+            {
+                question="Rate their Tech skills.",
+                answers=[
+                    "Excellent Django expertise. (Always)"
+                ]
+            }
+            {
+                question="Can they communicate and coordinate with the team",
+                answers=[
+                    "Always professional and on time. (Always on time)"
+                ]
+            }
+        ]
+    }
+]
+}

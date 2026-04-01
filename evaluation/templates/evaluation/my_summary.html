@@ -239,12 +239,12 @@
   lines.forEach(line => {
     const stripped = line.trim();
     // Detect headings: lines ending with ":" that are entirely uppercase-ish or **...**
-    const isHeading = /^(\*\*)?[A-Z][A-Z\s&()'-]+:(\*\*)?$/.test(stripped) ||
-                      /^(\*\*)?[A-Z][A-Za-z\s&()'-]+:(\*\*)?$/.test(stripped) && stripped.length < 60;
+    const isHeading = /^(\*\*|\*)?[A-Z][A-Z\s&()'-]+:(\*\*|\*)?$/.test(stripped) ||
+                      (/^(\*\*|\*)?[A-Z][A-Za-z\s&()'-]+:(\*\*|\*)?$/.test(stripped) && stripped.length < 60);
 
     if (isHeading) {
       if (current) blocks.push(current);
-      const headingText = stripped.replace(/\*\*/g, '').replace(/:$/, '').trim();
+      const headingText = stripped.replace(/\*/g, '').replace(/:$/, '').trim();
       current = { heading: headingText, lines: [] };
     } else if (current) {
       if (stripped) current.lines.push(stripped);

@@ -30,6 +30,38 @@
   .chart-card:hover{box-shadow:0 8px 32px rgba(57,82,188,.12);}
   .rank-row{transition:background .15s;border-radius:.75rem;padding:.875rem 1rem;}
   .rank-row:hover{background:#eff1f2;}
+  
+  /* AI Summary section cards */
+  .ai-reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.55s ease, transform 0.55s ease; }
+  .ai-reveal.visible { opacity: 1; transform: none; }
+  .sum-section { border-radius: 1.25rem; padding: 1.5rem 1.75rem; margin-bottom: 1rem; }
+  .sum-section-title { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.875rem; display: flex; align-items: center; gap: 0.5rem; }
+  .sum-section ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+  .sum-section ul li { position: relative; padding-left: 1.25rem; font-size: 0.9375rem; line-height: 1.65; color: #2c2f30; }
+  .sum-section ul li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 6px; height: 6px; border-radius: 50%; }
+  .sum-section p { font-size: 0.9375rem; line-height: 1.7; color: #2c2f30; margin: 0.25rem 0; }
+  .sum-section strong { font-weight: 700; }
+
+  /* Section colour themes */
+  .sec-performance { background: linear-gradient(135deg, #eef2ff 0%, #f0f4ff 100%); border: 1px solid #c7d2fe; }
+  .sec-performance .sum-section-title { color: #3730a3; }
+  .sec-performance ul li::before { background: #6366f1; }
+  .sec-strengths { background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf9 100%); border: 1px solid #a7f3d0; }
+  .sec-strengths .sum-section-title { color: #065f46; }
+  .sec-strengths ul li::before { background: #10b981; }
+  .sec-improvement { background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%); border: 1px solid #fed7aa; }
+  .sec-improvement .sum-section-title { color: #92400e; }
+  .sec-improvement ul li::before { background: #f59e0b; }
+  .sec-recommendations { background: linear-gradient(135deg, #fef3c7 0%, #fefce8 100%); border: 1px solid #fde68a; }
+  .sec-recommendations .sum-section-title { color: #78350f; }
+  .sec-recommendations ul li::before { background: #d97706; }
+  .sec-highlights { background: linear-gradient(135deg, #fdf4ff 0%, #faf5ff 100%); border: 1px solid #e9d5ff; }
+  .sec-highlights .sum-section-title { color: #581c87; }
+  .sec-highlights ul li::before { background: #9333ea; }
+  .sec-default { background: #f8fafc; border: 1px solid #e2e8f0; }
+  .sec-default .sum-section-title { color: #1e40af; }
+  .sec-default ul li::before { background: #3952bc; }
+
 </style>
 </head>
 <body class="text-on-surface min-h-screen">
@@ -246,6 +278,39 @@
     </div>
   </div>
 
+  <!-- AI Team Summary Content -->
+  <section class="glass-card p-6 md:p-8 rounded-3xl shadow-sm ai-reveal mb-8">
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 rounded-xl text-white shadow-sm" style="background: linear-gradient(135deg,#3952bc,#72479e);">
+          <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
+        </div>
+        <div>
+          <h2 class="text-xl font-extrabold text-on-surface">AI Team Synthesis</h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Powered by PRODVI AI · {% if team_summary.generated_at %}{{ team_summary.generated_at|date:"F d, Y" }}{% else %}Not generated yet{% endif %}</p>
+        </div>
+      </div>
+      <a href="{% url 'refresh_team_summary' form.id %}"
+         onclick="this.innerHTML='<span class=\'material-symbols-outlined text-[16px] animate-spin\'>refresh</span> Regenerating...'; this.classList.add('opacity-70','pointer-events-none');"
+         class="flex items-center gap-1.5 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-all shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">refresh</span> Regenerate
+      </a>
+    </div>
+
+    {% if not team_summary or not team_summary.ai_analysis %}
+    <div class="text-center py-12 text-on-surface-variant">
+      <span class="material-symbols-outlined text-5xl text-slate-300">hourglass_empty</span>
+      <p class="font-semibold mt-3">No team AI summary has been generated yet.</p>
+      <p class="text-sm opacity-70 mt-1">Click "Regenerate" to compile all peer reviews.</p>
+    </div>
+    {% else %}
+    <!-- Formatted AI Summary rendered by JS -->
+    <div id="summary-body"></div>
+    <!-- Raw text hidden, used by JS -->
+    <script id="raw-summary" type="text/plain">{{ team_summary.ai_analysis }}</script>
+    {% endif %}
+  </section>
+
   {% endif %}
 </main>
 
@@ -287,6 +352,101 @@ new Chart(document.getElementById('groupedBar'), {
     borderRadius: 6,
   }
 });
+
+// 3. AI Summary Formatter
+(function() {
+  const rawEl = document.getElementById('raw-summary');
+  const container = document.getElementById('summary-body');
+  if (!rawEl || !container) return;
+
+  const raw = rawEl.textContent.trim();
+  if (!raw) {
+    container.innerHTML = '<p class="text-on-surface-variant text-sm">No summary available.</p>';
+    return;
+  }
+
+  const SECTIONS = [
+    [/performance summary/i,    'sec-performance',    'leaderboard',    'Team Performance Summary'],
+    [/key strengths/i,          'sec-strengths',      'star',           'Collective Strengths'],
+    [/areas.*improve|improvement/i, 'sec-improvement','trending_up',    'Areas for Improvement'],
+    [/specific recommendations|recommendations/i, 'sec-recommendations','lightbulb','Team Recommendations'],
+    [/peer feedback highlights|highlights/i, 'sec-highlights','forum', 'Evaluation Highlights'],
+  ];
+
+  function getSectionMeta(heading) {
+    for (const [re, cls, icon, label] of SECTIONS) {
+      if (re.test(heading)) return { cls, icon, label };
+    }
+    return { cls: 'sec-default', icon: 'info', label: heading };
+  }
+
+  function clean(text) {
+    return text
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+      .replace(/^[-•]\s+/gm, '')
+      .trim();
+  }
+
+  const lines = raw.split('\n');
+  const blocks = [];
+  let current = null;
+
+  lines.forEach(line => {
+    const stripped = line.trim();
+    const isHeading = /^(\*\*|\*)?[A-Z][A-Z\s&()'-]+:(\*\*|\*)?$/.test(stripped) ||
+                      (/^(\*\*|\*)?[A-Z][A-Za-z\s&()'-]+:(\*\*|\*)?$/.test(stripped) && stripped.length < 60);
+
+    if (isHeading) {
+      if (current) blocks.push(current);
+      const headingText = stripped.replace(/\*/g, '').replace(/:$/, '').trim();
+      current = { heading: headingText, lines: [] };
+    } else if (current) {
+      if (stripped) current.lines.push(stripped);
+    } else {
+      if (stripped) {
+        if (!current) current = { heading: null, lines: [] };
+        current.lines.push(stripped);
+      }
+    }
+  });
+  if (current) blocks.push(current);
+
+  const html = blocks.map(block => {
+    const meta = block.heading ? getSectionMeta(block.heading) : { cls: 'sec-default', icon: 'notes', label: null };
+    const contentLines = block.lines;
+
+    let content;
+    if (contentLines.length > 1 || contentLines.some(l => /^[-•]\s/.test(l))) {
+      const items = contentLines.map(l => {
+        const subLabel = l.match(/^[-•]?\s*([A-Z][a-zA-Z\s\/&()'-]{0,50}):\s+(.+)/);
+        if (subLabel) {
+          return `<li><strong>${subLabel[1].trim()}:</strong> ${clean(subLabel[2])}</li>`;
+        }
+        return `<li>${clean(l.replace(/^[-•]\s*/, ''))}</li>`;
+      }).join('');
+      content = `<ul>${items}</ul>`;
+    } else {
+      content = contentLines.map(l => `<p>${clean(l)}</p>`).join('');
+    }
+
+    const titleHtml = meta.label
+      ? `<div class="sum-section-title">
+           <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1;">${meta.icon}</span>
+           ${meta.label}
+         </div>`
+      : '';
+
+    return `<div class="sum-section ${meta.cls}">${titleHtml}${content}</div>`;
+  }).join('');
+
+  container.innerHTML = html || `<p class="text-sm text-on-surface-variant">${clean(raw)}</p>`;
+})();
+
+// Fade-in AI blocks
+setTimeout(() => {
+  document.querySelectorAll('.ai-reveal').forEach(el => el.classList.add('visible'));
+}, 200);
 </script>
 </body>
 </html>

@@ -31,6 +31,7 @@ urlpatterns = [
     path('analytics/<int:form_id>/', views.personal_analytics, name='personal_analytics'),
     path('analytics/<int:form_id>/<int:employee_id>/', views.personal_analytics, name='personal_analytics_admin'),
     path('admin-analytics/<int:form_id>/', views.admin_team_analytics, name='admin_team_analytics'),
+    path('refresh-team-summary/<int:form_id>/', views.refresh_team_summary, name='refresh_team_summary'),
 
     # API
     path('evaluate/', api_views.EvaluateResponseAPIView.as_view(), name='evaluate'),

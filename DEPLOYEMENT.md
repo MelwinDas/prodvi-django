@@ -14,8 +14,6 @@
 - GEMINI_API_KEY
 - DATABASE_URL 
 
-## Post-Deployment:
-- [ ] Create superuser: `python manage.py createsuperuser`
-- [ ] Test admin panel
-- [ ] Test ML model functionality
-- [ ] Test Gemini API integration
+## Render Dashboard Settings
+- **Start Command**: `gunicorn prodvi_project.wsgi:application --workers 1 --timeout 120`
+- **Recommended Plan**: Starter (or any tier with >= 500MB RAM)

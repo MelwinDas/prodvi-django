@@ -387,7 +387,7 @@ def check_and_generate_summary(employee, form):
             form=form
         )
         
-        if created or not summary.gemini_analysis:
+        if created or not summary.gemini_analysis or "Error processing with Groq API" in summary.gemini_analysis:
             # Generate new summary file
             file_path = generate_summary_file(employee, form)
             if file_path:

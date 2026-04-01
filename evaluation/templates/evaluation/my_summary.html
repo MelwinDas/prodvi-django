@@ -158,6 +158,10 @@
 
 <!-- Action Buttons -->
 <section class="flex flex-col sm:flex-row gap-4 items-center justify-end">
+    <a href="{% url 'refresh_my_summary' form.id %}" onclick="this.innerHTML='<span class=\'animate-spin material-symbols-outlined\'>refresh</span> Generating...'; this.classList.add('opacity-70', 'pointer-events-none');" class="w-full sm:w-auto px-8 py-3 bg-indigo-50 border border-indigo-200 rounded-2xl font-bold text-sm text-indigo-700 hover:bg-indigo-100 transition-all flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[20px]">refresh</span>
+        Regenerate AI Summary
+    </a>
     <button onclick="window.print()" class="w-full sm:w-auto px-8 py-3 bg-white border border-slate-200 rounded-2xl font-bold text-sm text-on-surface hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.97] transition-all flex items-center justify-center gap-2">
         <span class="material-symbols-outlined text-[20px]">print</span>
         Print Summary

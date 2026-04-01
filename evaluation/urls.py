@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import api_views
 
 urlpatterns = [
     path('', views.landing_page, name='landing_page'),
@@ -26,5 +27,5 @@ urlpatterns = [
     path('my-output/<int:form_id>/', views.my_output, name='my_output'),
 
     # API
-    path('evaluate/', views.evaluate_response, name='evaluate'),
+    path('evaluate/', api_views.EvaluateResponseAPIView.as_view(), name='evaluate'),
 ]

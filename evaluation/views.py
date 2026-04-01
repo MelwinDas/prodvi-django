@@ -245,22 +245,23 @@ def review_colleague(request, form_id, colleague_id):
 
             # Run ML analysis
             try:
-                from .ml_models.qpsvc import QuestionClassifier
-                from .ml_models.genprocess import Brain
+                from .api_views import question_bundle, answer_bundle
 
-                classifier = QuestionClassifier()
-                brain = Brain()
+                if not question_bundle or not answer_bundle:
+                    raise Exception("ML models are not loaded in WSGI memory")
 
-                category, confidence = classifier.classify(question['text'])
+                category, conf_q = question_bundle.predict(question['text'])
 
-                if category != "Out of Scope":
-                    prediction = brain.brain(category, answer)
+                if category.lower() != "out of scope":
+                    prediction, conf_a = answer_bundle.predict(answer)
+                    confidence = float(conf_a)
                 else:
-                    prediction = brain.brain("Out of Scope", answer)
+                    prediction, conf_a = answer_bundle.predict(answer)
+                    confidence = float(conf_q)
 
                 ml_analysis[question['text']] = {
                     'category': category,
-                    'confidence': float(confidence),
+                    'confidence': confidence,
                     'prediction': str(prediction),
                     'rating': rating
                 }
@@ -289,45 +290,6 @@ def review_colleague(request, form_id, colleague_id):
         'colleague': colleague,
         'questions': form.questions
     })
-
-@login_required
-@csrf_exempt
-def evaluate_response(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            question = data.get('question', '')
-            answer = data.get('answer', '')
-
-            from .ml_models.qpsvc import QuestionClassifier
-            from .ml_models.genprocess import Brain
-
-            classifier = QuestionClassifier()
-            brain = Brain()
-
-            category, confidence = classifier.classify(question)
-
-            if category != "Out of Scope":
-                prediction = brain.brain(category, answer)
-            else:
-                prediction = brain.brain("Out of Scope", answer)
-
-            return JsonResponse({
-                'category': category,
-                'confidence': float(confidence),
-                'prediction': str(prediction),
-                'status': 'success'
-            })
-
-        except Exception as e:
-            error_details = {
-                'error': str(e),
-                'traceback': traceback.format_exc(),
-                'type': type(e).__name__
-            }
-            return JsonResponse(error_details, status=500)
-
-    return JsonResponse({'error': 'Method not allowed'}, status=405) 
 
 def generate_summary_file(employee, form):
     """Generate summary file for employee based on all peer reviews"""

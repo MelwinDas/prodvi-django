@@ -15,6 +15,10 @@ from .ml_models.train import ModelBundle
 
 # Restrict PyTorch to a single CPU thread to prevent massive memory spikes causing SIGKILL on Render
 torch.set_num_threads(1)
+# CRITICAL: Disable all gradient calculations to massively reduce memory overhead during prediction
+torch.set_grad_enabled(False)
+
+import gc
 
 _question_bundle = None
 _answer_bundle = None
@@ -42,12 +46,17 @@ def _load_models():
     try:
         if os.path.exists(Q_MODEL_PATH):
             _question_bundle = ModelBundle.load(Q_MODEL_PATH)
+            # Evaluate mode to disable dropout etc
+            if hasattr(_question_bundle, 'encoder'):
+                _question_bundle.encoder.eval()
             print("✓ Question classifier loaded successfully.")
         else:
             print(f"Warning: {Q_MODEL_PATH} not found.")
 
         if os.path.exists(A_MODEL_PATH):
             _answer_bundle = ModelBundle.load(A_MODEL_PATH)
+            if hasattr(_answer_bundle, 'encoder'):
+                _answer_bundle.encoder.eval()
             print("✓ Answer classifier loaded successfully.")
         else:
             print(f"Warning: {A_MODEL_PATH} not found.")
@@ -56,6 +65,16 @@ def _load_models():
         traceback.print_exc()
 
     _models_loaded = True
+
+def unload_models():
+    """Aggressively clear PyTorch models from memory to prevent the website from crashing."""
+    global _question_bundle, _answer_bundle, _models_loaded
+    _question_bundle = None
+    _answer_bundle = None
+    _models_loaded = False
+    # Force python garbage collector to free RAM immediately
+    gc.collect()
+    print("✓ Cleared PyTorch models from RAM to protect main website stability.")
 
 # ---------------------------------------------------------------------------
 # API View

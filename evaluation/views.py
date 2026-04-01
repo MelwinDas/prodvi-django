@@ -282,6 +282,14 @@ def review_colleague(request, form_id, colleague_id):
             ml_analysis=ml_analysis
         )
 
+        # CRITICAL: Always clear ML memory footprint locally after parsing a full form
+        # This guarantees PyTorch takes 0 MB of RAM while users browse the dashboard
+        try:
+            from .api_views import unload_models
+            unload_models()
+        except Exception:
+            pass
+
         messages.success(request, f'Review for {colleague.username} submitted successfully!')
         
         check_and_generate_summary(colleague, form)

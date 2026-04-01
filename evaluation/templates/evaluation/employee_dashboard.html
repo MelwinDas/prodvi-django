@@ -72,18 +72,14 @@
     <a class="sidebar-link active" href="{% url 'employee_dashboard' %}">
       <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">dashboard</span> Dashboard
     </a>
-    {% if forms_with_colleagues %}
-      {% for item in forms_with_colleagues %}
-      <a class="sidebar-link" href="{% url 'fill_evaluation' item.form.id %}">
-        <span class="material-symbols-outlined">edit_square</span>
-        <span class="truncate">Self Eval</span>
-      </a>
-      <a class="sidebar-link" href="{% url 'my_summary' item.form.id %}">
-        <span class="material-symbols-outlined">summarize</span>
-        <span class="truncate">My Summary</span>
-      </a>
-      {% endfor %}
-    {% endif %}
+    <a class="sidebar-link" href="{% url 'employee_dashboard' %}#pending-section">
+      <span class="material-symbols-outlined">pending_actions</span>
+      <span class="truncate">Pending Tasks</span>
+    </a>
+    <a class="sidebar-link" href="{% url 'employee_dashboard' %}#summary-section">
+      <span class="material-symbols-outlined">history_edu</span>
+      <span class="truncate">My Results</span>
+    </a>
   </nav>
 </aside>
 
@@ -126,7 +122,7 @@
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
 
     <!-- Pending Reviews -->
-    <div class="xl:col-span-2">
+    <div id="pending-section" class="xl:col-span-2 scroll-mt-24">
       <div class="glass-card rounded-3xl p-6 h-full">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-lg font-bold">Pending Reviews</h2>
@@ -161,7 +157,7 @@
     </div>
 
     <!-- My Performance Summaries -->
-    <div>
+    <div id="summary-section" class="scroll-mt-24">
       <div class="glass-card rounded-3xl p-6 h-full">
         <h2 class="text-lg font-bold mb-6">My Summaries</h2>
         <div class="space-y-3">

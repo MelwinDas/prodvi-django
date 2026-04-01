@@ -82,33 +82,88 @@
       {% for reviewee_id, data in reviews_by_reviewee.items %}
       <div class="reviewee-group">
         <!-- Reviewer header — click to expand -->
-        <div class="flex items-center justify-between p-5 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleReviews('reviews-{{ reviewee_id }}', this)">
-          <div class="flex items-center gap-4">
-            <div class="h-11 w-11 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-base flex-shrink-0">
+        <div class="flex items-center justify-between p-5">
+          <!-- Left side: Employee Info -->
+          <div class="flex items-center gap-4 cursor-pointer group flex-1" onclick="toggleReviews('reviews-{{ reviewee_id }}', this)">
+            <div class="h-12 w-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-primary font-bold shadow-sm transition-all group-hover:scale-110">
               {{ data.reviewee.username|slice:":1"|upper }}
             </div>
             <div>
-              <p class="font-bold text-on-surface">{{ data.reviewee.username }}</p>
-              <p class="text-xs text-on-surface-variant">{{ data.reviewee.department }} · {{ data.reviews|length }} review{{ data.reviews|length|pluralize }}</p>
+              <h3 class="font-bold text-on-surface text-base group-hover:text-primary transition-colors">{{ data.reviewee.username }}</h3>
+              <p class="text-[10px] font-semibold text-on-surface-variant uppercase tracking-widest opacity-60">{{ data.reviewee.department }} · {{ data.reviews|length }} reviews</p>
             </div>
           </div>
+
+          <!-- Right side: Actions -->
           <div class="flex items-center gap-3">
-            <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">{{ data.reviews|length }} received</span>
-            <span class="material-symbols-outlined text-on-surface-variant collapse-icon">expand_more</span>
+            <a href="{% url 're_evaluate_reviews' form.id reviewee_id %}" onclick="this.innerHTML='<span class=\'animate-spin material-symbols-outlined\'>refresh</span> Fixing...'; this.classList.add('opacity-70', 'pointer-events-none');" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-all flex items-center gap-1.5 no-underline">
+              <span class="material-symbols-outlined text-[16px]">psychology</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider">Fix Labels</span>
+            </a>
+            <div class="h-8 w-8 rounded-full hover:bg-slate-100 flex items-center justify-center cursor-pointer transition-colors" onclick="toggleReviews('reviews-{{ reviewee_id }}', this)">
+              <span class="material-symbols-outlined text-on-surface-variant collapse-icon">expand_more</span>
+            </div>
           </div>
         </div>
         <!-- Reviewer list (collapsible) -->
         <div id="reviews-{{ reviewee_id }}" class="review-detail">
-          <div class="space-y-2">
+          <div class="space-y-6">
             {% for review in data.reviews %}
-            <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white transition-colors">
-              <div class="flex items-center gap-3">
-                <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-on-surface-variant font-bold text-xs">
-                  {{ review.reviewer.username|slice:":1"|upper }}
+            <div class="bg-white/60 rounded-2xl p-5 border border-slate-200/50 shadow-sm">
+              <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/50">
+                <div class="flex items-center gap-3">
+                  <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-on-surface-variant font-bold text-xs">
+                    {{ review.reviewer.username|slice:":1"|upper }}
+                  </div>
+                  <p class="text-sm font-bold text-on-surface">{{ review.reviewer.username }}'s Feedback</p>
                 </div>
-                <p class="text-sm font-medium">{{ review.reviewer.username }}</p>
+                <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">{{ review.submitted_at|date:"M d, Y" }}</span>
               </div>
-              <span class="text-xs text-on-surface-variant">{{ review.submitted_at|date:"M d, Y" }}</span>
+              
+              <div class="space-y-5">
+                {% for q_text, resp in review.responses.items %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Question Side -->
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                       <span class="text-[10px] font-black text-primary/40 uppercase tracking-widest">Question</span>
+                       {% for ai_q, ai_data in review.ml_analysis.items %}
+                         {% if ai_q == q_text %}
+                         <span class="px-2 py-0.5 bg-primary/10 text-primary text-[9px] font-bold rounded-md uppercase tracking-tight">
+                           {{ ai_data.category|default:"General" }}
+                         </span>
+                         {% endif %}
+                       {% endfor %}
+                    </div>
+                    <p class="text-sm font-semibold text-slate-800 leading-snug">{{ q_text }}</p>
+                  </div>
+                  
+                  <!-- Answer Side -->
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] font-black text-secondary/40 uppercase tracking-widest">Team Feedback</span>
+                      {% for ai_q, ai_data in review.ml_analysis.items %}
+                         {% if ai_q == q_text %}
+                           {% if ai_data.error %}
+                           <span class="px-2 py-0.5 bg-error/10 text-error text-[9px] font-bold rounded-md uppercase tracking-tight">AI Error</span>
+                           {% elif resp.answer or resp|stringformat:"s" != "" %}
+                           <span class="px-2 py-0.5 bg-secondary/10 text-secondary text-[9px] font-bold rounded-md uppercase tracking-tight">
+                             {{ ai_data.prediction|default:ai_data.rating|default:"Classified" }}
+                           </span>
+                           {% endif %}
+                         {% endif %}
+                       {% endfor %}
+                    </div>
+                    <div class="text-sm text-slate-600 italic leading-relaxed border-l-2 border-slate-200 pl-3">
+                      "{% if resp.answer is not None %}{{ resp.answer }}{% else %}{{ resp }}{% endif %}"
+                    </div>
+                  </div>
+                </div>
+                {% if not forloop.last %}
+                <div class="h-px bg-slate-100 w-full"></div>
+                {% endif %}
+                {% endfor %}
+              </div>
             </div>
             {% endfor %}
           </div>

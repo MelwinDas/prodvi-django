@@ -93,11 +93,12 @@ def is_admin(user):
 
 @user_passes_test(is_admin)
 def admin_dashboard(request):
-    forms = EvaluationForm.objects.filter(created_by=request.user).order_by('-created_at')
+    """Admin view to see all evaluation forms"""
+    forms = EvaluationForm.objects.all().order_by('-created_at')
     employees = CustomUser.objects.filter(role='employee')
     
     # Calculate statistics
-    total_reviews = PeerReview.objects.filter(form__created_by=request.user).count()
+    total_reviews = PeerReview.objects.all().count()
     pending_reviews = 0
     
     # Calculate expected vs completed reviews for each form
@@ -149,7 +150,7 @@ def create_form(request):
 
 @user_passes_test(is_admin)
 def view_reviews(request, form_id):
-    form = get_object_or_404(EvaluationForm, id=form_id, created_by=request.user)
+    form = get_object_or_404(EvaluationForm, id=form_id)
     reviews = PeerReview.objects.filter(form=form).select_related('reviewer', 'reviewee')
     
     # Organize reviews by reviewee
@@ -233,10 +234,10 @@ def review_colleague(request, form_id, colleague_id):
         # Process each question and run ML analysis
         # Using enumerate to match typical indexed questions if IDs are missing
         for i, question in enumerate(form.questions):
-            # Generalized fix: match field names from template (answers_N and ratings_N)
-            q_id = question.get('id', i)
-            answer = request.POST.get(f"answers_{q_id}", '')
-            rating = request.POST.get(f"ratings_{q_id}", '')
+            # Match field names from template (answers_N and ratings_N)
+            # Use index 'i' as the primary lookup to match forloop.counter0 in template
+            answer = request.POST.get(f"answers_{i}", request.POST.get(f"answers_{question.get('id','')}", ''))
+            rating = request.POST.get(f"ratings_{i}", request.POST.get(f"ratings_{question.get('id','')}", ''))
             
             responses[question['text']] = {
                 'answer': answer,
@@ -432,21 +433,20 @@ def admin_employee_summary(request, form_id, employee_id):
     print(f"User: {request.user}, Role: {request.user.role}")
     
     try:
-        form = get_object_or_404(EvaluationForm, id=form_id, created_by=request.user)
+        form = get_object_or_404(EvaluationForm, id=form_id)
         print(f"Form found: {form}")
         
-        employee = get_object_or_404(CustomUser, id=employee_id, role='employee')
-        print(f"Employee found: {employee}")
+        employee = get_object_or_404(CustomUser, id=employee_id)
+        print(f"User found: {employee}")
         
-        summary = check_and_generate_summary(employee, form)
-        print(f"Summary: {summary}")
+        # Self-healing: Check for and fix any reviews with AI errors
+        detailed_reviews = PeerReview.objects.filter(reviewee=employee, form=form)
+        for review in detailed_reviews:
+            if any('error' in str(v) for v in review.ml_analysis.values()) or not review.ml_analysis:
+                re_evaluate_review(review)
         
-        if not summary:
-            messages.info(request, f'Summary for {employee.username} is not ready yet.')
-            return redirect('admin_summaries_list', form_id=form.id)
-        
-        # Fetch exact peer reviews to display raw questions/answers/labels uniquely for admins
-        detailed_reviews = PeerReview.objects.filter(employee=employee, form=form) if hasattr(PeerReview, 'employee') else PeerReview.objects.filter(reviewee=employee, form=form)
+        # Refresh summary if needed
+        summary = EmployeeSummary.objects.filter(employee=employee, form=form).first()
 
         return render(request, 'evaluation/employee_summary.html', {
             'summary': summary,
@@ -459,12 +459,46 @@ def admin_employee_summary(request, form_id, employee_id):
         import traceback
         traceback.print_exc()
         messages.error(request, 'Error loading summary')
-        return redirect('admin_dashboard')
+        return redirect('login')
+
+def re_evaluate_review(review):
+    """Re-run ML analysis for a single review to fix errors or update data"""
+    try:
+        from .api_views import get_question_bundle, get_answer_bundle
+        q_bundle = get_question_bundle()
+        a_bundle = get_answer_bundle()
+        
+        if not q_bundle or not a_bundle:
+            return False
+            
+        new_ml_analysis = {}
+        for q_text, resp in review.responses.items():
+            category, conf_q = q_bundle.predict(q_text)
+            if category.lower() != "out of scope":
+                prediction, conf_a = a_bundle.predict(resp['answer'])
+                confidence = float(conf_a)
+            else:
+                prediction, conf_a = a_bundle.predict(resp['answer'])
+                confidence = float(conf_q)
+                
+            new_ml_analysis[q_text] = {
+                'category': category,
+                'confidence': confidence,
+                'prediction': str(prediction),
+                'rating': resp.get('rating', '')
+            }
+        
+        review.ml_analysis = new_ml_analysis
+        review.save()
+        return True
+    except Exception as e:
+        print(f"Re-evaluation failed: {e}")
+        return False
 
 @user_passes_test(is_admin)
 def admin_summaries_list(request, form_id):
     """Admin view to see list of all employee summaries for a form"""
-    form = get_object_or_404(EvaluationForm, id=form_id, created_by=request.user)
+    form = get_object_or_404(EvaluationForm, id=form_id)
     
     # Get all assigned employees and their summary status
     employees_data = []
@@ -473,6 +507,10 @@ def admin_summaries_list(request, form_id):
         
         # Check if summary can be generated
         if not summary:
+            # First, heal any reviews for this employee before generating summary
+            for review in PeerReview.objects.filter(reviewee=employee, form=form):
+                if any('error' in str(v) for v in review.ml_analysis.values()) or not review.ml_analysis:
+                    re_evaluate_review(review)
             summary = check_and_generate_summary(employee, form)
         
         employees_data.append({
@@ -489,8 +527,8 @@ def admin_summaries_list(request, form_id):
 @user_passes_test(is_admin)
 def refresh_employee_summary(request, form_id, employee_id):
     """Admin can refresh/regenerate employee summary"""
-    form = get_object_or_404(EvaluationForm, id=form_id, created_by=request.user)
-    employee = get_object_or_404(CustomUser, id=employee_id, role='employee')
+    form = get_object_or_404(EvaluationForm, id=form_id)
+    employee = get_object_or_404(CustomUser, id=employee_id)
     
     try:
         # Get existing summary or create new one
@@ -563,7 +601,7 @@ def refresh_my_summary(request, form_id):
 def performance_output(request, form_id, employee_id):
     """Shared performance output page for both admins and employees"""
     form = get_object_or_404(EvaluationForm, id=form_id)
-    employee = get_object_or_404(CustomUser, id=employee_id, role='employee')
+    employee = get_object_or_404(CustomUser, id=employee_id)
     
     # Check permissions
     if request.user.role == 'admin':
@@ -694,3 +732,25 @@ def fill_evaluation(request, form_id):
         'form': form,
         'questions': form.questions
     })
+
+@user_passes_test(is_admin)
+def re_evaluate_employee_reviews(request, form_id, employee_id):
+    """Force re-run ML classification for an employee's reviews"""
+    from django.shortcuts import get_object_or_404, redirect
+    from django.contrib import messages
+    
+    form = get_object_or_404(EvaluationForm, id=form_id)
+    employee = get_object_or_404(CustomUser, id=employee_id)
+    reviews = PeerReview.objects.filter(form=form, reviewee=employee)
+    
+    success_count = 0
+    for review in reviews:
+        if re_evaluate_review(review):
+            success_count += 1
+            
+    if success_count:
+        messages.success(request, f"Successfully fixed and re-labeled {success_count} reviews!")
+    else:
+        messages.error(request, "Found no reviews to fix or AI service is unavailable.")
+        
+    return redirect('view_reviews', form_id=form_id)

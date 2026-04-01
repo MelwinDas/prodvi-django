@@ -123,14 +123,14 @@
               <td class="px-6 py-4 text-xs text-on-surface-variant">
                 {% if item.summary %}{{ item.summary.generated_at|date:"M d, Y" }}{% else %}—{% endif %}
               </td>
-              <td class="px-6 py-4 text-right">
-                {% if item.has_summary %}
-                <a href="{% url 'admin_employee_summary' form.id item.employee.id %}" class="inline-flex items-center gap-1 px-4 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-bold hover:bg-primary hover:text-white transition-all active:scale-95">
-                  <span class="material-symbols-outlined text-[14px]">open_in_new</span> View Summary
+              <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
+                <a href="{% url 'admin_employee_summary' form.id item.employee.id %}" class="inline-flex items-center gap-1 px-4 py-1.5 {% if item.has_summary %}bg-primary/10 text-primary hover:bg-primary hover:text-white{% else %}bg-slate-100 text-slate-500 hover:bg-slate-200{% endif %} rounded-lg text-xs font-bold transition-all active:scale-95">
+                  <span class="material-symbols-outlined text-[14px]">open_in_new</span> 
+                  {% if item.has_summary %}View Summary{% else %}View Partial{% endif %}
                 </a>
-                {% else %}
-                <span class="text-xs text-on-surface-variant italic">Not ready</span>
-                {% endif %}
+                <a href="{% url 'refresh_employee_summary' form.id item.employee.id %}" class="p-1.5 text-on-surface-variant hover:text-secondary transition-colors" title="Force Refresh">
+                  <span class="material-symbols-outlined text-[18px]">refresh</span>
+                </a>
               </td>
             </tr>
             {% empty %}

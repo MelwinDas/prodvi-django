@@ -192,7 +192,7 @@
                 <label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Tell us more</label>
                 <span class="char-counter text-[11px] text-on-surface-variant">0 chars</span>
               </div>
-              <textarea name="answers_{{ question.id }}" required class="w-full bg-surface-container-low border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none min-h-[110px] placeholder:text-slate-400 transition-shadow" placeholder="Provide specific examples and detailed feedback..." oninput="updateCharCount(this); updateProgress()"></textarea>
+              <textarea name="answers_{{ forloop.counter0 }}" required class="w-full bg-surface-container-low border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none min-h-[110px] placeholder:text-slate-400 transition-shadow" placeholder="Provide specific examples and detailed feedback..." oninput="updateCharCount(this); updateProgress()"></textarea>
             </div>
         </div>
 </div>

@@ -1,0 +1,23 @@
+{
+name="Kavan",
+questions=[
+    {
+        question="How was their team collaboration?",
+        answers=[
+                ""
+                ]
+    }
+    {
+        question="Rate their Tech skills.",
+        answers=[
+                ""
+                ]
+    }
+    {
+        question="Can they communicate and coordinate with the team",
+        answers=[
+                ""
+                ]
+    }
+          ]
+}

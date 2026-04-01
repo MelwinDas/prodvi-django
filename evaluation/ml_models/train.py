@@ -78,7 +78,7 @@ def _basic_clean(text: str) -> str:
     return text
 
 
-def preprocess_series(series: pd.Series) -> list[str]:
+def preprocess_series(series) -> list[str]:
     return [_basic_clean(t) for t in series.tolist()]
 
 
@@ -86,7 +86,7 @@ def preprocess_series(series: pd.Series) -> list[str]:
 # Embedding
 # ---------------------------------------------------------------------------
 
-def encode(encoder: SentenceTransformer, texts: list[str]) -> np.ndarray:
+def encode(encoder, texts: list[str]):
     """Encode a list of texts; show a progress bar for large batches."""
     return encoder.encode(
         texts,
@@ -101,7 +101,7 @@ def encode(encoder: SentenceTransformer, texts: list[str]) -> np.ndarray:
 # Training helpers
 # ---------------------------------------------------------------------------
 
-def train_svc(X: np.ndarray, y: np.ndarray, n_folds: int = 5) -> CalibratedClassifierCV:
+def train_svc(X, y, n_folds: int = 5):
     """
     Train a calibrated SVC head.
     CalibratedClassifierCV wraps LinearSVC so we get .predict_proba()
@@ -114,7 +114,7 @@ def train_svc(X: np.ndarray, y: np.ndarray, n_folds: int = 5) -> CalibratedClass
     return model
 
 
-def evaluate(model, X: np.ndarray, y: np.ndarray, label_names: list[str]) -> dict:
+def evaluate(model, X, y, label_names: list[str]):
     """5-fold stratified CV for honest generalisation estimate."""
     print("  Running 5-fold stratified cross-validation …")
     base = LinearSVC(C=1.0, max_iter=2000, dual=False)
@@ -127,14 +127,14 @@ def evaluate(model, X: np.ndarray, y: np.ndarray, label_names: list[str]) -> dic
     return {"weighted_f1": float(f1), "classification_report": report}
 
 
-def serialise_svc(model: CalibratedClassifierCV) -> bytes:
+def serialise_svc(model):
     """Serialise the fitted SVC head to bytes using joblib."""
     buf = io.BytesIO()
     joblib.dump(model, buf)
     return buf.getvalue()
 
 
-def save_pt(path: Path, payload: dict) -> None:
+def save_pt(path, payload: dict):
     torch.save(payload, path)
     size_mb = path.stat().st_size / 1e6
     print(f"  Saved → {path}  ({size_mb:.1f} MB)")
@@ -145,10 +145,10 @@ def save_pt(path: Path, payload: dict) -> None:
 # ---------------------------------------------------------------------------
 
 def train_question_classifier(
-    csv_path: Path,
-    encoder: SentenceTransformer,
-    output_dir: Path,
-) -> None:
+    csv_path,
+    encoder,
+    output_dir,
+):
     print("\n═══════════════════════════════════════════")
     print(" QUESTION CLASSIFIER")
     print("═══════════════════════════════════════════")
@@ -233,7 +233,7 @@ def _normalize_label(label: str) -> str:
     return LABEL_NORMALIZATION.get(label.strip(), label.strip())
 
 
-def _parse_answer_column(series: pd.Series) -> tuple[list[str], list[str]]:
+def _parse_answer_column(series):
     """
     Each cell in prodvi-dataset-new4.csv looks like:
         "She communicates clearly with the team(Positive)"
@@ -254,10 +254,10 @@ def _parse_answer_column(series: pd.Series) -> tuple[list[str], list[str]]:
 
 
 def train_answer_classifier(
-    csv_path: Path,
-    encoder: SentenceTransformer,
-    output_dir: Path,
-) -> None:
+    csv_path,
+    encoder,
+    output_dir,
+):
     print("\n═══════════════════════════════════════════")
     print(" ANSWER CLASSIFIER")
     print("═══════════════════════════════════════════")

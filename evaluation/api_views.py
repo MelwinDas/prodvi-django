@@ -1,24 +1,13 @@
 import os
+import traceback
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-import traceback
-import torch
-
-# Import the inference wrapper
-from .ml_models.train import ModelBundle
 
 # ---------------------------------------------------------------------------
 # Lazy Singleton Loading
 # ---------------------------------------------------------------------------
-
-# Restrict PyTorch to a single CPU thread to prevent massive memory spikes causing SIGKILL on Render
-torch.set_num_threads(1)
-# CRITICAL: Disable all gradient calculations to massively reduce memory overhead during prediction
-torch.set_grad_enabled(False)
-
-import gc
 
 _question_bundle = None
 _answer_bundle = None
@@ -39,6 +28,13 @@ def get_answer_bundle():
 def _load_models():
     global _question_bundle, _answer_bundle, _models_loaded
     print("Lazily loading PyTorch Models into WSGI memory on first request...")
+    
+    # Import ModelBundle only locally to prevent OOM on module load!
+    try:
+        from .ml_models.train import ModelBundle
+    except ImportError as e:
+        print(f"Error importing ModelBundle: {e}")
+        return
 
     Q_MODEL_PATH = os.path.join(settings.BASE_DIR, 'new_models', 'question_classifier.pt')
     A_MODEL_PATH = os.path.join(settings.BASE_DIR, 'new_models', 'answer_classifier.pt')
@@ -46,17 +42,12 @@ def _load_models():
     try:
         if os.path.exists(Q_MODEL_PATH):
             _question_bundle = ModelBundle.load(Q_MODEL_PATH)
-            # Evaluate mode to disable dropout etc
-            if hasattr(_question_bundle, 'encoder'):
-                _question_bundle.encoder.eval()
             print("✓ Question classifier loaded successfully.")
         else:
             print(f"Warning: {Q_MODEL_PATH} not found.")
 
         if os.path.exists(A_MODEL_PATH):
             _answer_bundle = ModelBundle.load(A_MODEL_PATH)
-            if hasattr(_answer_bundle, 'encoder'):
-                _answer_bundle.encoder.eval()
             print("✓ Answer classifier loaded successfully.")
         else:
             print(f"Warning: {A_MODEL_PATH} not found.")

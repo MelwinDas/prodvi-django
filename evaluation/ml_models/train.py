@@ -32,17 +32,6 @@ import string
 import warnings
 from pathlib import Path
 
-import joblib
-import numpy as np
-import pandas as pd
-import torch
-from sentence_transformers import SentenceTransformer
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.metrics import classification_report, f1_score
-from sklearn.model_selection import StratifiedKFold, cross_val_predict
-from sklearn.preprocessing import LabelEncoder
-from sklearn.svm import LinearSVC
-
 warnings.filterwarnings("ignore")
 
 # ---------------------------------------------------------------------------
@@ -373,15 +362,26 @@ class ModelBundle:
         self.metrics       = payload.get("metrics", {})
         self.columns       = payload.get("columns", [])
 
-        # Load encoder (cached after first load by sentence-transformers)
-        self.encoder = SentenceTransformer(self.encoder_name)
+        # Import locally to avoid module startup issues
+        import joblib
+        
+        # We assume the user means "don't load sentence_transformers at all if not used",
+        # but the inference currently needs it. So we load it ONLY when a ModelBundle is instantiated.
+        try:
+            from sentence_transformers import SentenceTransformer
+            # Load encoder (cached after first load by sentence-transformers)
+            self.encoder = SentenceTransformer(self.encoder_name)
+        except ImportError:
+            # If the user literally removed it, we'll cleanly handle the fact it's missing
+            self.encoder = None
 
         # Deserialise SVC head from bytes
         buf = io.BytesIO(payload["svc"])
-        self.svc: CalibratedClassifierCV = joblib.load(buf)
+        self.svc = joblib.load(buf)
 
     @classmethod
     def load(cls, path: str | Path) -> "ModelBundle":
+        import torch
         payload = torch.load(path, map_location="cpu", weights_only=False)
         return cls(payload)
 
@@ -390,25 +390,40 @@ class ModelBundle:
         Returns (predicted_label, confidence_probability).
         confidence is in [0, 1] — from CalibratedClassifierCV.predict_proba().
         """
+        import numpy as np
+
         clean = _basic_clean(text)
-        embedding = self.encoder.encode(
-            [clean],
-            normalize_embeddings=True,
-            convert_to_numpy=True,
-        )
+        
+        # If encoder exists, use it. Otherwise, raise a clear error that it's out.
+        if self.encoder:
+            embedding = self.encoder.encode(
+                [clean],
+                normalize_embeddings=True,
+                convert_to_numpy=True,
+            )
+        else:
+            raise RuntimeError("SentenceTransformer is not available, cannot encode text.")
+            
         proba = self.svc.predict_proba(embedding)[0]
         idx = int(np.argmax(proba))
         return self.label_classes[idx], float(proba[idx])
 
     def predict_batch(self, texts: list[str]) -> list[tuple[str, float]]:
         """Efficient batch prediction."""
+        import numpy as np
+        
         clean = [_basic_clean(t) for t in texts]
-        embeddings = self.encoder.encode(
-            clean,
-            batch_size=64,
-            normalize_embeddings=True,
-            convert_to_numpy=True,
-        )
+        
+        if self.encoder:
+            embeddings = self.encoder.encode(
+                clean,
+                batch_size=64,
+                normalize_embeddings=True,
+                convert_to_numpy=True,
+            )
+        else:
+            raise RuntimeError("SentenceTransformer is not available.")
+            
         probas = self.svc.predict_proba(embeddings)
         results = []
         for proba in probas:

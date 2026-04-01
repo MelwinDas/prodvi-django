@@ -177,12 +177,14 @@ def employee_dashboard(request):
     assigned_forms = EvaluationForm.objects.filter(
         assigned_employees=request.user,
         is_active=True
-    )
+    ).prefetch_related('assigned_employees')
     
     # For each form, get colleagues to review
     forms_with_colleagues = []
     for form in assigned_forms:
-        colleagues = form.assigned_employees.exclude(id=request.user.id)
+        # Generalized fix: only review other employees, exclude self and admins
+        colleagues = form.assigned_employees.filter(role='employee').exclude(id=request.user.id)
+        
         reviewed_colleagues = PeerReview.objects.filter(
             form=form,
             reviewer=request.user
@@ -229,9 +231,17 @@ def review_colleague(request, form_id, colleague_id):
         ml_analysis = {}
 
         # Process each question and run ML analysis
+        # Using enumerate to match typical indexed questions if IDs are missing
         for i, question in enumerate(form.questions):
-            answer = request.POST.get(f"question_{i}", '')
-            responses[question['text']] = answer
+            # Generalized fix: match field names from template (answers_N and ratings_N)
+            q_id = question.get('id', i)
+            answer = request.POST.get(f"answers_{q_id}", '')
+            rating = request.POST.get(f"ratings_{q_id}", '')
+            
+            responses[question['text']] = {
+                'answer': answer,
+                'rating': rating
+            }
 
             # Run ML analysis
             try:
@@ -251,7 +261,8 @@ def review_colleague(request, form_id, colleague_id):
                 ml_analysis[question['text']] = {
                     'category': category,
                     'confidence': float(confidence),
-                    'prediction': str(prediction)
+                    'prediction': str(prediction),
+                    'rating': rating
                 }
             except Exception as e:
                 ml_analysis[question['text']] = {
@@ -275,7 +286,8 @@ def review_colleague(request, form_id, colleague_id):
 
     return render(request, 'evaluation/review_colleague.html', {
         'form': form,
-        'colleague': colleague
+        'colleague': colleague,
+        'questions': form.questions
     })
 
 @login_required
@@ -583,26 +595,38 @@ def performance_output(request, form_id, employee_id):
     reviews = PeerReview.objects.filter(reviewee=employee, form=form)
     
     # Calculate ML rating distribution
-    rating_counts = {'Excellent': 0, 'Good': 0, 'Average': 0, 'Needs Improvement': 0}
+    rating_counts = {'Excellent': 0, 'Good': 0, 'Satisfactory': 0, 'Needs Improvement': 0}
     total_answers = 0
     total_score = 0
     
+    score_map = {'Excellent': 5, 'Good': 4, 'Satisfactory': 3, 'Needs Improvement': 2}
+
     for review in reviews:
         try:
-            # FIXED: Use correct field name
-            answers = json.loads(review.review_data)
-            for answer_data in answers:
-                if 'ml_rating' in answer_data:
-                    rating = answer_data['ml_rating']
+            # Process ML analysis and ratings
+            # The structure of ml_analysis is {question_text: {category: X, prediction: Y}}
+            if review.ml_analysis:
+                for q_text, analysis in review.ml_analysis.items():
+                    # Both prediction and rating can be used
+                    rating = analysis.get('prediction') or analysis.get('rating')
                     if rating in rating_counts:
                         rating_counts[rating] += 1
-                    total_answers += 1
-                    
-                    # Calculate score (Excellent=5, Good=4, Average=3, Needs Improvement=2)
-                    score_map = {'Excellent': 5, 'Good': 4, 'Average': 3, 'Needs Improvement': 2}
-                    total_score += score_map.get(rating, 0)
+                        total_answers += 1
+                        total_score += score_map.get(rating, 0)
+            
+            # If ML analysis is missing or not containing ratings, check responses for manual ratings
+            elif isinstance(review.responses, dict):
+                for q_text, resp in review.responses.items():
+                    if isinstance(resp, dict) and 'rating' in resp:
+                        # Convert numeric rating to label if needed
+                        val = str(resp['rating'])
+                        num_map = {'5': 'Excellent', '4': 'Good', '3': 'Satisfactory', '2': 'Needs Improvement', '1': 'Needs Improvement'}
+                        label = num_map.get(val, 'Satisfactory')
+                        rating_counts[label] += 1
+                        total_answers += 1
+                        total_score += score_map.get(label, 0)
         except Exception as e:
-            print(f"Error processing review: {e}")
+            print(f"Error processing review {review.id}: {e}")
             continue
     
     # Calculate overall score

@@ -245,18 +245,21 @@ def review_colleague(request, form_id, colleague_id):
 
             # Run ML analysis
             try:
-                from .api_views import question_bundle, answer_bundle
+                from .api_views import get_question_bundle, get_answer_bundle
+                
+                q_bundle = get_question_bundle()
+                a_bundle = get_answer_bundle()
 
-                if not question_bundle or not answer_bundle:
+                if not q_bundle or not a_bundle:
                     raise Exception("ML models are not loaded in WSGI memory")
 
-                category, conf_q = question_bundle.predict(question['text'])
+                category, conf_q = q_bundle.predict(question['text'])
 
                 if category.lower() != "out of scope":
-                    prediction, conf_a = answer_bundle.predict(answer)
+                    prediction, conf_a = a_bundle.predict(answer)
                     confidence = float(conf_a)
                 else:
-                    prediction, conf_a = answer_bundle.predict(answer)
+                    prediction, conf_a = a_bundle.predict(answer)
                     confidence = float(conf_q)
 
                 ml_analysis[question['text']] = {

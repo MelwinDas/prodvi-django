@@ -4,38 +4,58 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 import traceback
+import torch
 
 # Import the inference wrapper
 from .ml_models.train import ModelBundle
 
 # ---------------------------------------------------------------------------
-# Global Singleton Loading
+# Lazy Singleton Loading
 # ---------------------------------------------------------------------------
 
-print("Loading PyTorch Models into WSGI memory...")
+# Restrict PyTorch to a single CPU thread to prevent massive memory spikes causing SIGKILL on Render
+torch.set_num_threads(1)
 
-Q_MODEL_PATH = os.path.join(settings.BASE_DIR, 'new_models', 'question_classifier.pt')
-A_MODEL_PATH = os.path.join(settings.BASE_DIR, 'new_models', 'answer_classifier.pt')
+_question_bundle = None
+_answer_bundle = None
+_models_loaded = False
 
-try:
-    if os.path.exists(Q_MODEL_PATH):
-        question_bundle = ModelBundle.load(Q_MODEL_PATH)
-        print("✓ Question classifier loaded successfully globally.")
-    else:
-        question_bundle = None
-        print(f"Warning: {Q_MODEL_PATH} not found.")
+def get_question_bundle():
+    global _question_bundle, _answer_bundle, _models_loaded
+    if not _models_loaded:
+        _load_models()
+    return _question_bundle
 
-    if os.path.exists(A_MODEL_PATH):
-        answer_bundle = ModelBundle.load(A_MODEL_PATH)
-        print("✓ Answer classifier loaded successfully globally.")
-    else:
-        answer_bundle = None
-        print(f"Warning: {A_MODEL_PATH} not found.")
-except Exception as e:
-    print(f"Error loading models globally: {e}")
-    traceback.print_exc()
-    question_bundle = None
-    answer_bundle = None
+def get_answer_bundle():
+    global _question_bundle, _answer_bundle, _models_loaded
+    if not _models_loaded:
+        _load_models()
+    return _answer_bundle
+
+def _load_models():
+    global _question_bundle, _answer_bundle, _models_loaded
+    print("Lazily loading PyTorch Models into WSGI memory on first request...")
+
+    Q_MODEL_PATH = os.path.join(settings.BASE_DIR, 'new_models', 'question_classifier.pt')
+    A_MODEL_PATH = os.path.join(settings.BASE_DIR, 'new_models', 'answer_classifier.pt')
+
+    try:
+        if os.path.exists(Q_MODEL_PATH):
+            _question_bundle = ModelBundle.load(Q_MODEL_PATH)
+            print("✓ Question classifier loaded successfully.")
+        else:
+            print(f"Warning: {Q_MODEL_PATH} not found.")
+
+        if os.path.exists(A_MODEL_PATH):
+            _answer_bundle = ModelBundle.load(A_MODEL_PATH)
+            print("✓ Answer classifier loaded successfully.")
+        else:
+            print(f"Warning: {A_MODEL_PATH} not found.")
+    except Exception as e:
+        print(f"Error loading models: {e}")
+        traceback.print_exc()
+
+    _models_loaded = True
 
 # ---------------------------------------------------------------------------
 # API View
@@ -58,18 +78,21 @@ class EvaluateResponseAPIView(APIView):
             return Response({"error": "Question and answer required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            if not question_bundle or not answer_bundle:
+            q_bundle = get_question_bundle()
+            a_bundle = get_answer_bundle()
+
+            if not q_bundle or not a_bundle:
                 return Response({"error": "Models not loaded globally."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
             
             # Predict question category
-            category, conf_q = question_bundle.predict(question)
+            category, conf_q = q_bundle.predict(question)
 
             # Predict rating based on answer
             if category.lower() != "out of scope":
-                prediction, conf_a = answer_bundle.predict(answer)
+                prediction, conf_a = a_bundle.predict(answer)
                 confidence = float(conf_a)
             else:
-                prediction, conf_a = answer_bundle.predict(answer)
+                prediction, conf_a = a_bundle.predict(answer)
                 confidence = float(conf_q) # Question confidence for out of scope
 
             return Response({

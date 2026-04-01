@@ -27,6 +27,11 @@ urlpatterns = [
     path('output/<int:form_id>/<int:employee_id>/', views.performance_output, name='performance_output'),
     path('my-output/<int:form_id>/', views.my_output, name='my_output'),
 
+    # Analytics dashboards
+    path('analytics/<int:form_id>/', views.personal_analytics, name='personal_analytics'),
+    path('analytics/<int:form_id>/<int:employee_id>/', views.personal_analytics, name='personal_analytics_admin'),
+    path('admin-analytics/<int:form_id>/', views.admin_team_analytics, name='admin_team_analytics'),
+
     # API
     path('evaluate/', api_views.EvaluateResponseAPIView.as_view(), name='evaluate'),
 ]

@@ -1,0 +1,292 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Team Analytics — {{ form.title }} · PRODVI</title>
+<link rel="icon" type="image/png" href="{% static 'evaluation/images/favicon.png' %}">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  tailwind.config={darkMode:"class",theme:{extend:{colors:{
+    "primary":"#3952bc","secondary":"#72479e","tertiary":"#0058ba",
+    "surface":"#f5f6f7","surface-container-low":"#eff1f2","surface-container":"#e6e8ea","surface-container-lowest":"#ffffff",
+    "on-surface":"#2c2f30","on-surface-variant":"#595c5d","outline":"#757778","outline-variant":"#abadae",
+    "error":"#b41340","primary-container":"#859aff","secondary-container":"#e4c6ff"
+  },fontFamily:{body:["Inter"]}}}}
+</script>
+<style>
+  body{font-family:'Inter',sans-serif;background:#f5f6f7;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  .glass-card{background:rgba(255,255,255,0.9);backdrop-filter:blur(16px);border:1px solid rgba(117,119,120,0.08);}
+  .brand-gradient{background:linear-gradient(135deg,#3952bc 0%,#72479e 100%);}
+  .sidebar-link{display:flex;align-items:center;gap:.75rem;padding:.625rem 1rem;border-radius:.875rem;font-size:.875rem;font-weight:500;color:#595c5d;transition:all .2s;text-decoration:none;}
+  .sidebar-link:hover{background:#eff1f2;color:#3952bc;transform:translateX(2px);}
+  .sidebar-link.active{background:white;color:#3952bc;font-weight:700;box-shadow:0 2px 8px rgba(57,82,188,.12);}
+  .chart-card{background:white;border-radius:1.5rem;padding:1.5rem;box-shadow:0 2px 16px rgba(57,82,188,.06);border:1px solid rgba(57,82,188,.07);transition:box-shadow .2s;}
+  .chart-card:hover{box-shadow:0 8px 32px rgba(57,82,188,.12);}
+  .rank-row{transition:background .15s;border-radius:.75rem;padding:.875rem 1rem;}
+  .rank-row:hover{background:#eff1f2;}
+</style>
+</head>
+<body class="text-on-surface min-h-screen">
+
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm flex justify-between items-center px-8 h-16 border-b border-slate-200/50">
+  <div class="flex items-center gap-4">
+    <img class="h-9 w-auto object-contain" src="{% static 'evaluation/images/logo.png' %}" alt="PRODVI"/>
+    <span class="text-xl font-black bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight">PRODVI</span>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="text-right hidden sm:block">
+      <p class="text-xs font-bold text-on-surface">{{ request.user.username }}</p>
+      <p class="text-[10px] text-on-surface-variant">Administrator</p>
+    </div>
+    <img class="h-9 w-9 rounded-full ring-2 ring-primary/20" src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff" alt="Avatar"/>
+    <a href="{% url 'logout' %}" class="p-2 text-error/70 hover:text-error transition-colors ml-1">
+      <span class="material-symbols-outlined">logout</span>
+    </a>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<aside class="hidden lg:flex h-screen w-64 fixed left-0 top-0 pt-20 flex-col gap-2 p-4 border-r border-slate-200/50 bg-slate-50">
+  <div class="mb-4 px-2">
+    <h2 class="text-sm font-black text-slate-900 tracking-tight">Team Analytics</h2>
+    <p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold mt-0.5">{{ form.title }}</p>
+  </div>
+  <nav class="flex flex-col gap-1">
+    <a class="sidebar-link" href="{% url 'admin_dashboard' %}">
+      <span class="material-symbols-outlined">dashboard</span> Dashboard
+    </a>
+    <a class="sidebar-link" href="{% url 'view_reviews' form.id %}">
+      <span class="material-symbols-outlined">rate_review</span> Audit Reviews
+    </a>
+    <a class="sidebar-link" href="{% url 'admin_summaries_list' form.id %}">
+      <span class="material-symbols-outlined">summarize</span> Summaries
+    </a>
+    <a class="sidebar-link active" href="#">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">group</span> Team Analytics
+    </a>
+  </nav>
+
+  <!-- Per-employee quick links -->
+  <div class="mt-4 px-2 border-t border-slate-200 pt-4">
+    <p class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">Individual Reports</p>
+    <div class="flex flex-col gap-1">
+    {% for td in team_data %}
+      <a href="{% url 'personal_analytics_admin' form.id td.employee.id %}"
+         class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm hover:bg-slate-100 text-on-surface-variant transition-all">
+        <div class="h-6 w-6 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">{{ td.employee.username|slice:":1"|upper }}</div>
+        {{ td.employee.username }}
+      </a>
+    {% endfor %}
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="lg:ml-64 pt-20 px-6 pb-20">
+
+  <!-- Header -->
+  <section class="mt-6 mb-8 relative overflow-hidden rounded-3xl px-8 py-8 brand-gradient text-white shadow-xl shadow-primary/20">
+    <div class="relative z-10">
+      <p class="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">{{ form.title }}</p>
+      <h1 class="text-3xl font-extrabold tracking-tight">Team Performance Analytics 🏆</h1>
+      <p class="text-white/70 text-sm mt-1">{{ team_data|length }} employees · {{ all_categories|length }} skill categories tracked</p>
+    </div>
+    <div class="absolute -right-8 -bottom-8 opacity-10 pointer-events-none">
+      <span class="material-symbols-outlined text-[180px]" style="font-variation-settings:'FILL' 1;">leaderboard</span>
+    </div>
+  </section>
+
+  {% if not team_data %}
+  <div class="glass-card rounded-3xl p-16 text-center">
+    <span class="material-symbols-outlined text-6xl text-slate-300">people</span>
+    <p class="text-lg font-semibold text-on-surface-variant mt-4">No employees assigned to this form yet.</p>
+  </div>
+  {% else %}
+
+  <!-- KPI Row -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="glass-card rounded-2xl p-5 text-center">
+      <p class="text-3xl font-extrabold text-primary">{{ team_data|length }}</p>
+      <p class="text-xs text-on-surface-variant font-semibold uppercase tracking-wider mt-1">Employees</p>
+    </div>
+    <div class="glass-card rounded-2xl p-5 text-center">
+      <p class="text-3xl font-extrabold text-secondary">{{ all_categories|length }}</p>
+      <p class="text-xs text-on-surface-variant font-semibold uppercase tracking-wider mt-1">Skill Areas</p>
+    </div>
+    <div class="glass-card rounded-2xl p-5 text-center">
+      {% with ranking|first as top %}
+      <p class="text-2xl font-extrabold text-emerald-500">{{ top.employee.username|default:"—" }}</p>
+      {% endwith %}
+      <p class="text-xs text-on-surface-variant font-semibold uppercase tracking-wider mt-1">Most Reviewed</p>
+    </div>
+    <div class="glass-card rounded-2xl p-5 text-center">
+      <p class="text-3xl font-extrabold text-amber-500">{{ all_categories|length }}</p>
+      <p class="text-xs text-on-surface-variant font-semibold uppercase tracking-wider mt-1">Categories</p>
+    </div>
+  </div>
+
+  <!-- Chart Grid Row 1 -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+
+    <!-- Team Radar -->
+    <div class="chart-card">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="font-bold text-on-surface">Team Skill Radar</h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Average performance score per category per employee (−1 poor → +1 excellent)</p>
+        </div>
+        <span class="material-symbols-outlined text-primary/40">radar</span>
+      </div>
+      <div class="relative h-72">
+        <canvas id="teamRadar"></canvas>
+      </div>
+    </div>
+
+    <!-- Ranking -->
+    <div class="chart-card">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="font-bold text-on-surface">Review Activity Ranking</h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Sorted by total peer reviews received</p>
+        </div>
+        <span class="material-symbols-outlined text-amber-400">emoji_events</span>
+      </div>
+      <div class="space-y-2">
+        {% for td in ranking %}
+        <div class="rank-row flex items-center gap-4">
+          <div class="text-xl font-extrabold {% if forloop.first %}text-amber-400{% elif forloop.counter == 2 %}text-slate-400{% elif forloop.counter == 3 %}text-amber-700{% else %}text-slate-300{% endif %} w-6 text-center">
+            {% if forloop.first %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}
+          </div>
+          <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+            {{ td.employee.username|slice:":1"|upper }}
+          </div>
+          <div class="flex-1">
+            <a href="{% url 'personal_analytics_admin' form.id td.employee.id %}" class="text-sm font-bold text-on-surface hover:text-primary transition-colors">
+              {{ td.employee.username }}
+            </a>
+            <p class="text-xs text-on-surface-variant">{{ td.employee.department }}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-extrabold text-primary">{{ td.analytics.total_reviews }}</p>
+            <p class="text-[10px] text-on-surface-variant">reviews</p>
+          </div>
+          <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+                 style="width: {% if ranking.0.analytics.total_reviews > 0 %}{% widthratio td.analytics.total_reviews ranking.0.analytics.total_reviews 100 %}{% else %}0{% endif %}%"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Grouped Category Bar -->
+  <div class="chart-card mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="font-bold text-on-surface">Category Score Comparison</h2>
+        <p class="text-xs text-on-surface-variant mt-0.5">Side-by-side average performance scores for all employees (−1 poor → +1 excellent)</p>
+      </div>
+      <span class="material-symbols-outlined text-secondary/40">bar_chart</span>
+    </div>
+    <div class="relative h-72">
+      <canvas id="groupedBar"></canvas>
+    </div>
+  </div>
+
+  <!-- Per-employee category heatmap (text-based) -->
+  <div class="chart-card mb-6">
+    <h2 class="font-bold text-on-surface mb-1">Employee × Category Heatmap</h2>
+    <p class="text-xs text-on-surface-variant mb-5">Review count received per skill area per employee</p>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr>
+            <th class="text-left py-2 pr-4 text-[11px] text-on-surface-variant font-bold uppercase tracking-wider">Employee</th>
+            {% for cat in all_categories %}
+            <th class="text-center py-2 px-2 text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">{{ cat }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for td in team_data %}
+          <tr>
+            <td class="py-3 pr-4">
+              <a href="{% url 'personal_analytics_admin' form.id td.employee.id %}" class="flex items-center gap-2 hover:text-primary transition-colors">
+                <div class="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">{{ td.employee.username|slice:":1"|upper }}</div>
+                <span class="font-semibold">{{ td.employee.username }}</span>
+              </a>
+            </td>
+            {% for cat in all_categories %}
+            {% with count=td.analytics.category_counts|default_if_none:0 %}
+            <td class="py-3 px-2 text-center">
+              {% for c, v in td.analytics.category_counts.items %}
+                {% if c == cat %}
+                  <span class="inline-flex items-center justify-center h-7 w-7 rounded-lg text-xs font-bold
+                    {% if v >= 3 %}bg-primary text-white{% elif v == 2 %}bg-primary/20 text-primary{% else %}bg-surface-container text-on-surface-variant{% endif %}">
+                    {{ v }}
+                  </span>
+                {% endif %}
+              {% empty %}
+              {% endfor %}
+            </td>
+            {% endwith %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% endif %}
+</main>
+
+<script>
+const categories = {{ all_categories_json|safe }};
+const radarDatasets = {{ radar_datasets_json|safe }};
+const compDatasets  = {{ comparison_datasets_json|safe }};       // count-based (for heatmap)
+const scoreDatasets = {{ comparison_score_datasets_json|safe }}; // score-based (for bar chart)
+
+// 1. Team Radar — uses label SCORES (−1 to +1)
+new Chart(document.getElementById('teamRadar'), {
+  type: 'radar',
+  data: { labels: categories, datasets: radarDatasets },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: { r: { min: -1.0, max: 1.0, ticks: { stepSize: 0.5, font: {size:10} }, grid: { color: '#e6e8ea' } } },
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: {size:11} } } }
+  }
+});
+
+// 2. Grouped Score Bar — uses average label SCORES (−1 to +1)
+new Chart(document.getElementById('groupedBar'), {
+  type: 'bar',
+  data: { labels: categories, datasets: scoreDatasets },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: {size:11} } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}`
+        }
+      }
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { min: -1.0, max: 1.0, ticks: { stepSize: 0.5 }, grid: { color: '#f0f0f0' } }
+    },
+    borderRadius: 6,
+  }
+});
+</script>
+</body>
+</html>

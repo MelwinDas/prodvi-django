@@ -754,3 +754,303 @@ def re_evaluate_employee_reviews(request, form_id, employee_id):
         messages.error(request, "Found no reviews to fix or AI service is unavailable.")
         
     return redirect('view_reviews', form_id=form_id)
+
+
+# ---------------------------------------------------------------------------
+# Analytics Views
+# ---------------------------------------------------------------------------
+
+# Label → numeric score mapping.
+# Scores range: -1.0 (very negative) → 1.0 (very positive)
+# Neutral/baseline labels score around 0.0
+_LABEL_SCORES = {
+    # Ease of Working Together
+    'Very Easy': 1.0,
+    'Easy': 0.6,
+    'Neutral': 0.0,
+    'Difficult': -0.6,
+    'Very Difficult': -1.0,
+
+    # Cooperation / Helps Others
+    'Highly Cooperative': 1.0,
+    'Always': 1.0,
+    'Often': 0.7,
+    'Cooperative': 0.6,
+    'Sometimes': 0.0,
+    'Rarely': -0.5,
+    'Not Cooperative': -0.7,
+    'Very Uncooperative': -1.0,
+    'Never': -1.0,
+
+    # Work Ethics
+    'Excellent': 1.0,
+    'Good': 0.6,
+    'Average': 0.0,
+    'Poor': -0.7,
+    'Very Poor': -1.0,
+
+    # Punctuality
+    'Always on time': 1.0,
+    'Usually on time': 0.6,
+    'Sometimes Late': -0.2,
+    'Frequently Late': -0.8,
+
+    # Work Efficiency
+    'Highly Efficient': 1.0,
+    'Moderately Efficient': 0.5,
+    'Average Efficiency': 0.0,
+    'Needs Improvement': -0.6,
+
+    # Problem Solving
+    'Exceptional Problem Solver': 1.0,
+    'Good Problem Solver': 0.6,
+    'Average Problem Solver': 0.0,
+    'Struggles with Problem Solving': -0.7,
+
+    # Adaptability
+    'Highly Adaptable': 1.0,
+    'Moderately Adaptable': 0.5,
+    'Somewhat Adaptable': 0.1,
+    'Resistant to Change': -0.8,
+
+    # Communication
+    'Excellent Communicator': 1.0,
+    'Good Communicator': 0.6,
+    'Average Communicator': 0.0,
+    'Needs Improvement in Communication': -0.7,
+
+    # Innovation
+    'Highly Innovative': 1.0,
+    'Moderately Innovative': 0.5,
+    'Average Innovator': 0.0,
+    'Limited Innovation': -0.7,
+
+    # Leadership
+    'Strong Leader': 1.0,
+    'Good Leader': 0.6,
+    'Moderate Leadership Skills': 0.1,
+    'Struggles with Leadership': -0.8,
+
+    # Self Motivation
+    'Highly Self-Motivated': 1.0,
+    'Moderately Self-Motivated': 0.5,
+    'Somewhat Self-Motivated': 0.1,
+    'Low Self-Motivation': -0.8,
+
+    # Emotional Intelligence
+    'Highly Emotionally Intelligent': 1.0,
+    'Moderate Emotional Intelligence': 0.3,
+    'Somewhat Emotionally Intelligent': 0.0,
+    'Low Emotional Intelligence': -0.8,
+}
+
+
+def _label_to_score(prediction):
+    """Return a numeric score for a prediction label. Falls back to 0 if unknown."""
+    if not prediction:
+        return 0.0
+    # Direct lookup
+    if prediction in _LABEL_SCORES:
+        return _LABEL_SCORES[prediction]
+    # Substring fuzzy match — covers labels with minor wording
+    pred_lower = prediction.lower()
+    for label, score in _LABEL_SCORES.items():
+        if label.lower() in pred_lower or pred_lower in label.lower():
+            return score
+    return 0.0
+
+
+def _build_analytics_data(reviews):
+    """
+    Aggregate PeerReview ML analysis into chart-ready structures.
+    Returns a dict with keys:
+      - category_counts:   {category: count}
+      - prediction_counts: {prediction: count}
+      - category_scores:   {category: avg_numeric_score}  ← used for all charts
+      - category_confidence: {category: avg_confidence}   ← kept for heatmap only
+      - drill_down:        {category: [{question, answer, prediction, confidence, score, reviewer}]}
+    """
+    category_counts = {}
+    prediction_counts = {}
+    category_score_sum = {}
+    category_confidence_sum = {}
+    category_n = {}
+    drill_down = {}
+
+    for review in reviews:
+        if not review.ml_analysis:
+            continue
+        for q_text, ml_data in review.ml_analysis.items():
+            if 'error' in ml_data:
+                continue
+            cat = ml_data.get('category', 'General').replace('_', ' ').title()
+            pred = ml_data.get('prediction', 'Unknown')
+            conf = float(ml_data.get('confidence', 0))
+            score = _label_to_score(pred)
+
+            # Get the actual answer text
+            answer_data = review.responses.get(q_text, {})
+            if isinstance(answer_data, dict):
+                answer_text = answer_data.get('answer', '')
+            else:
+                answer_text = str(answer_data)
+
+            # Skip empty answers for drill-down display
+            if not answer_text.strip():
+                continue
+
+            category_counts[cat] = category_counts.get(cat, 0) + 1
+            prediction_counts[pred] = prediction_counts.get(pred, 0) + 1
+            category_score_sum[cat] = category_score_sum.get(cat, 0) + score
+            category_confidence_sum[cat] = category_confidence_sum.get(cat, 0) + conf
+            category_n[cat] = category_n.get(cat, 0) + 1
+
+            if cat not in drill_down:
+                drill_down[cat] = []
+            drill_down[cat].append({
+                'question': q_text,
+                'answer': answer_text,
+                'prediction': pred,
+                'score': round(score, 2),
+                'confidence': round(conf, 2),
+                'reviewer': review.reviewer.username,
+            })
+
+    # Average score per category (used for all chart plotting)
+    category_scores = {
+        cat: round(category_score_sum[cat] / category_n[cat], 2)
+        for cat in category_n
+    }
+    # Average confidence per category (shown only in heatmap row)
+    category_confidence = {
+        cat: round(category_confidence_sum[cat] / category_n[cat], 2)
+        for cat in category_n
+    }
+
+    return {
+        'category_counts': category_counts,
+        'prediction_counts': prediction_counts,
+        'category_scores': category_scores,
+        'category_confidence': category_confidence,
+        'drill_down': drill_down,
+        'total_reviews': len(reviews),
+    }
+
+
+@login_required
+def personal_analytics(request, form_id, employee_id=None):
+    """
+    Personal analytics dashboard.
+    - Employee: can only view their own (employee_id ignored / redirected).
+    - Admin: can view anyone via employee_id parameter.
+    """
+    form = get_object_or_404(EvaluationForm, id=form_id)
+
+    if request.user.role == 'admin':
+        if employee_id:
+            employee = get_object_or_404(CustomUser, id=employee_id)
+        else:
+            # Admin viewing without choosing — show first employee
+            employee = form.assigned_employees.filter(role='employee').first()
+            if not employee:
+                messages.error(request, "No employees assigned to this form.")
+                return redirect('admin_dashboard')
+    else:
+        # Employees can only see their own data
+        employee = request.user
+        if employee not in form.assigned_employees.all():
+            messages.error(request, "You are not assigned to this form.")
+            return redirect('employee_dashboard')
+
+    reviews = PeerReview.objects.filter(form=form, reviewee=employee).select_related('reviewer')
+    analytics = _build_analytics_data(list(reviews))
+
+    # All employees in the form for the admin switcher
+    all_employees = form.assigned_employees.filter(role='employee') if request.user.role == 'admin' else []
+
+    return render(request, 'evaluation/personal_analytics.html', {
+        'form': form,
+        'employee': employee,
+        'analytics': analytics,
+        'analytics_json': json.dumps(analytics),
+        'all_employees': all_employees,
+        'drill_down_json': json.dumps(analytics.get('drill_down', {})),
+    })
+
+
+@user_passes_test(is_admin)
+def admin_team_analytics(request, form_id):
+    """
+    Admin-only team comparison dashboard.
+    Builds per-employee analytics and cross-employee comparison datasets.
+    """
+    form = get_object_or_404(EvaluationForm, id=form_id)
+    employees = form.assigned_employees.filter(role='employee')
+
+    team_data = []
+    all_categories = set()
+
+    for emp in employees:
+        reviews = PeerReview.objects.filter(form=form, reviewee=emp).select_related('reviewer')
+        analytics = _build_analytics_data(list(reviews))
+        all_categories.update(analytics['category_counts'].keys())
+        team_data.append({
+            'employee': emp,
+            'analytics': analytics,
+        })
+
+    # Build comparison chart datasets
+    all_categories = sorted(all_categories)
+
+    colors = ['#3952bc', '#72479e', '#0058ba', '#059669', '#dc2626', '#d97706', '#7c3aed']
+
+    # Grouped bar: each employee's review COUNT per category (kept for heatmap table)
+    comparison_datasets = []
+    for i, td in enumerate(team_data):
+        color = colors[i % len(colors)]
+        comparison_datasets.append({
+            'label': td['employee'].username,
+            'data': [td['analytics']['category_counts'].get(cat, 0) for cat in all_categories],
+            'backgroundColor': color + '99',
+            'borderColor': color,
+            'borderWidth': 2,
+        })
+
+    # Grouped bar: each employee's average label score per category
+    comparison_score_datasets = []
+    for i, td in enumerate(team_data):
+        color = colors[i % len(colors)]
+        comparison_score_datasets.append({
+            'label': td['employee'].username,
+            'data': [td['analytics']['category_scores'].get(cat, 0) for cat in all_categories],
+            'backgroundColor': color + '99',
+            'borderColor': color,
+            'borderWidth': 2,
+        })
+
+    # Radar: average label SCORE per category per employee (not confidence)
+    radar_datasets = []
+    for i, td in enumerate(team_data):
+        color = colors[i % len(colors)]
+        radar_datasets.append({
+            'label': td['employee'].username,
+            'data': [td['analytics']['category_scores'].get(cat, 0) for cat in all_categories],
+            'backgroundColor': color + '33',
+            'borderColor': color,
+            'borderWidth': 2,
+            'pointBackgroundColor': color,
+        })
+
+    # Ranking: sort employees by total reviews received
+    ranking = sorted(team_data, key=lambda x: x['analytics']['total_reviews'], reverse=True)
+
+    return render(request, 'evaluation/admin_analytics.html', {
+        'form': form,
+        'team_data': team_data,
+        'all_categories': all_categories,
+        'comparison_datasets_json': json.dumps(comparison_datasets),
+        'comparison_score_datasets_json': json.dumps(comparison_score_datasets),
+        'radar_datasets_json': json.dumps(radar_datasets),
+        'all_categories_json': json.dumps(all_categories),
+        'ranking': ranking,
+    })

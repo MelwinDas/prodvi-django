@@ -188,21 +188,6 @@
     </div>
         <div class="space-y-4">
             <div>
-              <div class="flex items-center justify-between mb-2">
-                <label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Rating</label>
-                <div class="flex items-center gap-2">
-                  <span id="rating-label-{{ forloop.counter }}" class="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Average</span>
-                  <span id="rating-val-{{ forloop.counter }}" class="w-7 h-7 rounded-full brand-gradient text-white flex items-center justify-center font-bold text-sm shadow">3</span>
-                </div>
-              </div>
-              <input name="ratings_{{ question.id }}" required type="range" min="1" max="5" value="3" class="w-full"
-                data-index="{{ forloop.counter }}"
-                oninput="updateSlider(this, {{ forloop.counter }}); updateProgress()"/>
-              <div class="flex justify-between text-[10px] text-on-surface-variant mt-1">
-                <span>Poor</span><span>Below Avg</span><span>Average</span><span>Good</span><span>Excellent</span>
-              </div>
-            </div>
-            <div>
               <div class="flex justify-between items-center mb-2">
                 <label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Tell us more</label>
                 <span class="char-counter text-[11px] text-on-surface-variant">0 chars</span>
@@ -229,20 +214,6 @@
 
 <script src="{% static 'evaluation/js/ui.js' %}"></script>
 <script>
-  const ratingLabels = {1:'Poor',2:'Below Avg',3:'Average',4:'Good',5:'Excellent'};
-  const ratingColors = {1:'#b41340',2:'#f59e0b',3:'#6366f1',4:'#3b82f6',5:'#10b981'};
-
-  function updateSlider(input, idx) {
-    const v = parseInt(input.value);
-    const pct = ((v - 1) / 4) * 100;
-    input.style.setProperty('--val', pct + '%');
-    document.getElementById('rating-val-' + idx).textContent = v;
-    const lbl = document.getElementById('rating-label-' + idx);
-    lbl.textContent = ratingLabels[v];
-    lbl.style.color = ratingColors[v];
-    lbl.style.background = ratingColors[v] + '18';
-  }
-
   function updateCharCount(textarea) {
     const counter = textarea.closest('div').previousElementSibling?.querySelector('.char-counter') 
       || textarea.closest('.space-y-4').querySelector('.char-counter');

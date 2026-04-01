@@ -292,7 +292,7 @@ def review_colleague(request, form_id, colleague_id):
     })
 
 def generate_summary_file(employee, form):
-    """Generate summary file for employee based on all peer reviews"""
+    """Generate summary txt file for employee based on all peer reviews"""
     
     # Get all reviews for this employee on this form
     reviews = PeerReview.objects.filter(reviewee=employee, form=form)
@@ -300,38 +300,56 @@ def generate_summary_file(employee, form):
     if not reviews.exists():
         return None
     
-    # Create summary data in format like your examples
-    summary_data = {
-        "name": employee.username,
-        "questions": []
-    }
+    # Build the custom txt payload
+    lines = []
+    lines.append("{")
+    lines.append(f'name="{employee.username}",')
+    lines.append("questions=[")
     
-    # Organize answers by question
-    for question in form.questions:
-        question_data = {
-            "question": question['text'],
-            "answers": []
-        }
+    for i, question in enumerate(form.questions):
+        lines.append("    {")
+        lines.append(f'        question="{question["text"]}",')
+        lines.append("        answers=[")
         
         # Collect all answers for this question from different reviewers
+        answers_for_q = []
         for review in reviews:
             if question['text'] in review.responses:
-                answer = review.responses[question['text']]
-                reviewer_name = review.reviewer.username
-                question_data['answers'].append(f"{answer} (by {reviewer_name})")
+                ans_data = review.responses[question['text']]
+                # Sometimes it's a dict depending on schema changes, extract just string
+                ans_text = ans_data.get('answer', str(ans_data)) if isinstance(ans_data, dict) else str(ans_data)
+                
+                # Optionally append the classifier prediction if available
+                if review.ml_analysis and question['text'] in review.ml_analysis:
+                    pred = review.ml_analysis[question['text']].get('prediction', '')
+                    if pred:
+                        ans_text = f"{ans_text} ({pred})"
+                
+                answers_for_q.append(f'                "{ans_text}"')
         
-        summary_data['questions'].append(question_data)
+        # Join all answers separating by comma
+        if answers_for_q:
+            lines.append(",\n".join(answers_for_q))
+        
+        lines.append("                ]")
+        # Append closing brace; if it's the last question, omit trailing comma? (larson.txt doesn't have commas between objects but let's emulate closely)
+        lines.append("    }")
+    
+    lines.append("          ]")
+    lines.append("}")
+    
+    content = "\n".join(lines)
     
     # Create summaries directory if it doesn't exist
     summaries_dir = os.path.join(settings.BASE_DIR, 'evaluation', 'summaries')
     os.makedirs(summaries_dir, exist_ok=True)
     
-    # Save to JSON file
-    filename = f"{employee.username}_{form.id}_summary.json"
+    # Save to TXT file
+    filename = f"{employee.username}_{form.id}_summary.txt"
     file_path = os.path.join(summaries_dir, filename)
     
-    with open(file_path, 'w') as f:
-        json.dump(summary_data, f, indent=2)
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(content)
     
     return file_path
 
@@ -343,7 +361,8 @@ def process_with_gemini_api(file_path):
         analysis = processor.process_new_file(file_path)
         return analysis
     except Exception as e:
-        return f"Error processing with Gemini API: {str(e)}"
+        print(f"Error in evaluate_with_gemini: {e}")
+        return f"Error processing with Groq API: {str(e)}"
 
 def check_and_generate_summary(employee, form):
     """Check if all reviews are complete and generate summary"""
@@ -423,10 +442,14 @@ def admin_employee_summary(request, form_id, employee_id):
             messages.info(request, f'Summary for {employee.username} is not ready yet.')
             return redirect('admin_summaries_list', form_id=form.id)
         
+        # Fetch exact peer reviews to display raw questions/answers/labels uniquely for admins
+        detailed_reviews = PeerReview.objects.filter(employee=employee, form=form) if hasattr(PeerReview, 'employee') else PeerReview.objects.filter(reviewee=employee, form=form)
+
         return render(request, 'evaluation/employee_summary.html', {
             'summary': summary,
             'form': form,
-            'employee': employee
+            'employee': employee,
+            'detailed_reviews': detailed_reviews
         })
     except Exception as e:
         print(f"ERROR: {str(e)}")
@@ -485,7 +508,7 @@ def refresh_employee_summary(request, form_id, employee_id):
             summary.generated_at = timezone.now()  # Update timestamp
             summary.save()
             
-            if "Error processing with Gemini API" in analysis:
+            if "Error processing with Groq API" in analysis:
                 messages.warning(request, f'Summary refreshed but API error occurred. Please try again.')
             else:
                 messages.success(request, f'Summary for {employee.username} has been refreshed successfully!')
@@ -521,7 +544,7 @@ def refresh_my_summary(request, form_id):
             summary.generated_at = timezone.now()
             summary.save()
             
-            if "Error processing with Gemini API" in analysis:
+            if "Error processing with Groq API" in analysis:
                 messages.warning(request, 'Summary refreshed but API error occurred. Please try again.')
             else:
                 messages.success(request, 'Your performance summary has been refreshed successfully!')
